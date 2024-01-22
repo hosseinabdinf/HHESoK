@@ -272,7 +272,7 @@ var RtFHeraParams = []*HalfBootParameters{
 	{
 		LogN:         16,
 		LogSlots:     15,
-		Scale:        1 << 40,
+		Scale:        1 << 40,   // shift 40 to left 1 bit
 		PlainModulus: 268042241, // 28-bit
 		Sigma:        DefaultSigma,
 		ResidualModuli: []uint64{
