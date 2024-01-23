@@ -5,6 +5,7 @@ type Parameter struct {
 	PlainSize  int
 	CipherSize int
 	Modulus    uint64
+	Rounds     int
 }
 
 // GetKeySize returns the secret key size in bits
@@ -25,4 +26,8 @@ func (params Parameter) GetCipherSize() int {
 // GetModulus returns modulus
 func (params Parameter) GetModulus() uint64 {
 	return params.Modulus
+}
+
+func (params Parameter) GetRounds() int {
+	return params.Rounds
 }

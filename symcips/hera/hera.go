@@ -12,16 +12,15 @@ type Hera interface {
 
 type hera struct {
 	params    Parameter
-	shake256  sha3.ShakeHash
+	shake     sha3.ShakeHash
 	secretKey symcips.Key
 	state     symcips.Block
 	rcs       symcips.Matrix
 	p         uint64
-	rounds    int
 }
 
-// NewHera return a new instance of hera cipher
-func NewHera(secretKey symcips.Key, params Parameter, r int) Hera {
+// NewHera return a new instance of Hera cipher
+func NewHera(secretKey symcips.Key, params Parameter) Hera {
 	if len(secretKey) != params.GetKeySize() {
 		panic("Invalid Key Length!")
 	}
@@ -30,10 +29,9 @@ func NewHera(secretKey symcips.Key, params Parameter, r int) Hera {
 	state := make(symcips.Block, params.GetPlainSize())
 	her := &hera{
 		params:    params,
-		shake256:  nil,
+		shake:     nil,
 		secretKey: secretKey,
 		state:     state,
-		rounds:    r,
 		p:         params.GetModulus(),
 		rcs:       nil,
 	}
@@ -57,7 +55,7 @@ func (her *hera) keyStream(nonce []byte) symcips.Block {
 	her.keySchedule(0)
 
 	// 1 < rounds < r
-	for r := 1; r < her.rounds; r++ {
+	for r := 1; r < her.params.GetRounds(); r++ {
 		her.mixColumns()
 		her.mixRows()
 		her.sBoxCube()
@@ -70,7 +68,7 @@ func (her *hera) keyStream(nonce []byte) symcips.Block {
 	her.sBoxCube()
 	her.mixColumns()
 	her.mixRows()
-	her.keySchedule(her.rounds)
+	her.keySchedule(her.params.GetRounds())
 
 	return her.state
 }
@@ -86,20 +84,20 @@ func (her *hera) initShake(nonce []byte) {
 	if _, err := shake.Write(nonce); err != nil {
 		panic("Failed to init SHAKE128!")
 	}
-	her.shake256 = shake
+	her.shake = shake
 }
 
 func (her *hera) generateRCs() {
 	key := her.secretKey
 	p := her.params.GetModulus()
-	r := her.rounds
+	rounds := her.params.GetRounds()
 
-	rcs := make([][]uint64, r+1)
+	rcs := make([][]uint64, rounds+1)
 	// K * rc_i, where i is round index
-	for r := 0; r <= r; r++ {
+	for r := 0; r <= rounds; r++ {
 		rcs[r] = make([]uint64, 16)
 		for st := 0; st < 16; st++ {
-			rcs[r][st] = ckks_fv.SampleZqx(her.shake256, p) * key[st] % p
+			rcs[r][st] = ckks_fv.SampleZqx(her.shake, p) * key[st] % p
 		}
 	}
 	her.rcs = rcs

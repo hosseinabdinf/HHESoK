@@ -301,6 +301,7 @@ func plainRubato(blocksize int, numRound int, nonce []byte, counter []byte, key 
 		}
 	}
 
+	// init state with numbers between 1 and blockSize
 	for i := 0; i < blocksize; i++ {
 		state[i] = uint64(i + 1)
 	}
