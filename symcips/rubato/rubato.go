@@ -45,6 +45,7 @@ func (rub *rubato) NewEncryptor() Encryptor {
 	return &encryptor{rub: *rub}
 }
 
+// keyStream returns a vector of [BlockSize - 4] uint64 elements as key stream
 func (rub *rubato) keyStream(nonce []byte, counter []byte) symcips.Block {
 	p := rub.params.GetModulus()
 	rounds := rub.params.GetRounds()
@@ -114,7 +115,7 @@ func (rub *rubato) generateRCs() {
 	blockSize := rub.params.GetBlockSize()
 	p := rub.params.GetModulus()
 	rounds := rub.params.GetRounds()
-
+	// generate round constant and then calculate rc = rc * k % p for ARK function
 	rcs := make(symcips.Matrix, rounds+1)
 	for r := 0; r <= rounds; r++ {
 		rcs[r] = make([]uint64, blockSize)
@@ -128,7 +129,7 @@ func (rub *rubato) generateRCs() {
 func (rub *rubato) linearLayer() {
 	blockSize := len(rub.state)
 	p := rub.params.GetModulus()
-	buf := make([]uint64, blockSize)
+	buf := make(symcips.Block, blockSize)
 
 	if blockSize == 16 {
 		// MixColumns
@@ -213,7 +214,7 @@ func (rub *rubato) linearLayer() {
 func (rub *rubato) sBoxFeistel() {
 	p := rub.params.GetModulus()
 	blockSize := rub.params.GetBlockSize()
-	buf := make([]uint64, blockSize)
+	buf := make(symcips.Block, blockSize)
 
 	for i := 0; i < blockSize; i++ {
 		buf[i] = rub.state[i]
