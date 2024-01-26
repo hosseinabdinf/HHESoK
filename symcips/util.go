@@ -3,6 +3,7 @@ package symcips
 import (
 	"encoding/csv"
 	"fmt"
+	"math"
 	"os"
 )
 
@@ -68,4 +69,26 @@ func (c Ciphertext) SaveToFile(name string) {
 		}
 	}
 	fmt.Println(name, " saved to file")
+}
+
+// Uint64ToHex converts a vector of uint64 elements to hexadecimal values
+// and print them
+func Uint64ToHex(data []uint64) {
+	hexData := make([]string, len(data))
+	for i, v := range data {
+		hexData[i] = fmt.Sprintf("%#x", v)
+	}
+	fmt.Println(hexData)
+}
+
+// ScaleUpToModulus scale up the f by p
+// and return the integer value
+func ScaleUpToModulus(f float64, p uint64) uint64 {
+	return uint64(math.Round(f * float64(p)))
+}
+
+// ScaleDownToFloat scale an integer value x by p
+// and return the floating point value
+func ScaleDownToFloat(x uint64, p uint64) float64 {
+	return float64(x) / float64(p)
 }

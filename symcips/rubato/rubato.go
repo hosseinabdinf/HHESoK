@@ -28,7 +28,7 @@ func NewRubato(secretKey symcips.Key, params Parameter) Rubato {
 		panic("Invalid Key Length!")
 	}
 
-	state := make([]uint64, params.GetBlockSize())
+	state := make(symcips.Block, params.GetBlockSize())
 	rub := &rubato{
 		params:    params,
 		shake:     nil,
@@ -45,7 +45,7 @@ func (rub *rubato) NewEncryptor() Encryptor {
 	return &encryptor{rub: *rub}
 }
 
-// keyStream returns a vector of [BlockSize - 4] uint64 elements as key stream
+// keyStream returns a vector of [BlockSize - 4][uint64] elements as key stream
 func (rub *rubato) keyStream(nonce []byte, counter []byte) symcips.Block {
 	p := rub.params.GetModulus()
 	rounds := rub.params.GetRounds()
@@ -80,9 +80,8 @@ func (rub *rubato) keyStream(nonce []byte, counter []byte) symcips.Block {
 	for i := 0; i < blockSize; i++ {
 		rub.state[i] = (rub.state[i] + rub.rcs[rounds][i]) % p
 	}
-	rub.state = rub.state[0 : blockSize-4]
-
-	return rub.state
+	//rub.state = rub.state[0 : blockSize-4]
+	return rub.state[0 : blockSize-4]
 }
 
 func (rub *rubato) initState() {
