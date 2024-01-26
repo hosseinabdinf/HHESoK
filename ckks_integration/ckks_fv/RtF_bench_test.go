@@ -373,13 +373,14 @@ func benchmarkRtFRubato(b *testing.B, rubatoParam int) {
 		panic(err)
 	}
 
-	// Encode float data added by keystream to plaintext coefficients
+	// Encode float data added by key stream to plaintext coefficients
 	fvEvaluator = NewMFVEvaluator(params, EvaluationKey{Rlk: rlk, Rtks: rotkeys}, pDcds)
 	coeffs := make([][]float64, outputsize)
 	for s := 0; s < outputsize; s++ {
 		coeffs[s] = make([]float64, params.N())
 	}
 
+	// Key generation
 	key = make([]uint64, blocksize)
 	for i := 0; i < blocksize; i++ {
 		key[i] = uint64(i + 1) // Use (1, ..., 16) for testing
@@ -416,7 +417,7 @@ func benchmarkRtFRubato(b *testing.B, rubatoParam int) {
 		}
 	}
 
-	// Encode plaintext
+	// Encode plaintext and Encrypt with key stream
 	plainCKKSRingTs = make([]*PlaintextRingT, outputsize)
 	for s := 0; s < outputsize; s++ {
 		plainCKKSRingTs[s] = ckksEncoder.EncodeCoeffsRingTNew(coeffs[s], messageScaling)

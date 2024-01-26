@@ -81,14 +81,14 @@ func Uint64ToHex(data []uint64) {
 	fmt.Println(hexData)
 }
 
-// ScaleUpToModulus scale up the f by p
+// ScaleUp scale up the f by p
 // and return the integer value
-func ScaleUpToModulus(f float64, p uint64) uint64 {
-	return uint64(math.Round(f * float64(p)))
+func ScaleUp(f float64, scaleFactor float64) uint64 {
+	return uint64(math.Round(f * scaleFactor))
 }
 
-// ScaleDownToFloat scale an integer value x by p
+// ScaleDown scale an integer value x by p
 // and return the floating point value
-func ScaleDownToFloat(x uint64, p uint64) float64 {
-	return float64(x) / float64(p)
+func ScaleDown(x uint64, scaleFactor float64) float64 {
+	return float64(x) / scaleFactor
 }

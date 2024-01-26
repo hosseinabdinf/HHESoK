@@ -46,7 +46,7 @@ func (rub *rubato) NewEncryptor() Encryptor {
 }
 
 // keyStream returns a vector of [BlockSize - 4][uint64] elements as key stream
-func (rub *rubato) keyStream(nonce []byte, counter []byte) symcips.Block {
+func (rub *rubato) keyStream(nonce []byte, counter []byte) (ks symcips.Block) {
 	p := rub.params.GetModulus()
 	rounds := rub.params.GetRounds()
 	blockSize := rub.params.GetBlockSize()
@@ -74,14 +74,16 @@ func (rub *rubato) keyStream(nonce []byte, counter []byte) symcips.Block {
 	rub.linearLayer()
 	rub.sBoxFeistel()
 	rub.linearLayer()
+	// adding this noise will change the key randomly !!
+	// cause lost very small part of plaintext
 	if rub.params.GetSigma() > 0 {
 		rub.addGaussianNoise()
 	}
 	for i := 0; i < blockSize; i++ {
 		rub.state[i] = (rub.state[i] + rub.rcs[rounds][i]) % p
 	}
-	//rub.state = rub.state[0 : blockSize-4]
-	return rub.state[0 : blockSize-4]
+	ks = rub.state[0 : blockSize-4]
+	return
 }
 
 func (rub *rubato) initState() {

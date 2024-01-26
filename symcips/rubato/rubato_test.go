@@ -27,11 +27,11 @@ func TestGenerateDummyData(t *testing.T) {
 	fmt.Println(">  Setup the parameters")
 	for _, test := range testVector {
 		outputSize := test.params.GetBlockSize() - 4
-
-		fmt.Println(">  Data generation")
 		// Get random data in [0, 1]
-		// it is a Matrix of 12*16 elements
 		N := 16
+		delta := float64(test.params.GetModulus()) / float64(N)
+		// it is a Matrix of 12*16 elements
+		fmt.Println(">  Data generation")
 		data := make([][]float64, outputSize)
 		for s := 0; s < outputSize; s++ {
 			data[s] = make([]float64, N)
@@ -47,17 +47,29 @@ func TestGenerateDummyData(t *testing.T) {
 
 		// scale data to save as []uint64
 		ciphertext := make([]symcips.Ciphertext, outputSize)
+		newPlaintext := make([]symcips.Plaintext, outputSize)
 		for s := 0; s < outputSize; s++ {
 			plaintext := func() []uint64 {
 				result := make([]uint64, len(data[s]))
 				for i, v := range data[s] {
-					result[i] = symcips.ScaleUpToModulus(v, test.params.GetModulus())
+					result[i] = symcips.ScaleUp(v, delta)
 				}
 				return result
 			}()
+			fmt.Println("original: ", data[0])
 			//symcips.Uint64ToHex(plaintext)
 			fmt.Println(">  Encrypt() the data[", s, "]")
 			ciphertext[s] = encryptor.Encrypt(plaintext)
+			fmt.Println("Cipher: ", ciphertext[s])
+			newPlaintext[s] = encryptor.Decrypt(ciphertext[s])
+			nData := func() []float64 {
+				res := make([]float64, len(newPlaintext[s]))
+				for j, el := range newPlaintext[s] {
+					res[j] = symcips.ScaleDown(el, delta)
+				}
+				return res
+			}()
+			fmt.Println("new Data: ", nData)
 		}
 	}
 }
