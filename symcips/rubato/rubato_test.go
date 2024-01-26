@@ -30,6 +30,7 @@ func TestGenerateDummyData(t *testing.T) {
 
 		fmt.Println(">  Data generation")
 		// Get random data in [0, 1]
+		// it is a Matrix of 12*16 elements
 		N := 16
 		data := make([][]float64, outputSize)
 		for s := 0; s < outputSize; s++ {
