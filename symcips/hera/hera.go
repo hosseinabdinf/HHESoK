@@ -21,12 +21,11 @@ type hera struct {
 
 // NewHera return a new instance of Hera cipher
 func NewHera(secretKey symcips.Key, params Parameter) Hera {
-	if len(secretKey) != params.GetKeySize() {
+	if len(secretKey) != params.GetBlockSize() {
 		panic("Invalid Key Length!")
 	}
 
-	//state = make([]uint64, 16)
-	state := make(symcips.Block, params.GetPlainSize())
+	state := make(symcips.Block, params.GetBlockSize())
 	her := &hera{
 		params:    params,
 		shake:     nil,
@@ -42,18 +41,14 @@ func (her *hera) NewEncryptor() Encryptor {
 	return &encryptor{her: *her}
 }
 
-func (her *hera) keyStream(nonce []byte) symcips.Block {
+func (her *hera) keyStream(nonce []byte) (ks symcips.Block) {
 	// init Shake256
 	her.initShake(nonce)
-
-	// init state with values between 1 and 16
+	// init state with values between 1 and BlockSize
 	her.initState()
-
 	her.generateRCs()
-
 	// round = 0
 	her.keySchedule(0)
-
 	// 1 < rounds < r
 	for r := 1; r < her.params.GetRounds(); r++ {
 		her.mixColumns()
@@ -61,7 +56,6 @@ func (her *hera) keyStream(nonce []byte) symcips.Block {
 		her.sBoxCube()
 		her.keySchedule(r)
 	}
-
 	// the last round
 	her.mixColumns()
 	her.mixRows()
@@ -69,12 +63,12 @@ func (her *hera) keyStream(nonce []byte) symcips.Block {
 	her.mixColumns()
 	her.mixRows()
 	her.keySchedule(her.params.GetRounds())
-
-	return her.state
+	ks = her.state
+	return
 }
 
 func (her *hera) initState() {
-	for i := 0; i < 16; i++ {
+	for i := 0; i < her.params.GetBlockSize(); i++ {
 		her.state[i] = uint64(i + 1)
 	}
 }
@@ -91,21 +85,22 @@ func (her *hera) generateRCs() {
 	key := her.secretKey
 	p := her.params.GetModulus()
 	rounds := her.params.GetRounds()
+	blockSize := her.params.GetBlockSize()
 
 	rcs := make([][]uint64, rounds+1)
-	// K * rc_i, where i is round index
+	// K * rc_r, where r is round index
 	for r := 0; r <= rounds; r++ {
-		rcs[r] = make([]uint64, 16)
-		for st := 0; st < 16; st++ {
-			rcs[r][st] = ckks_fv.SampleZqx(her.shake, p) * key[st] % p
+		rcs[r] = make([]uint64, blockSize)
+		for i := 0; i < blockSize; i++ {
+			rcs[r][i] = ckks_fv.SampleZqx(her.shake, p) * key[i] % p
 		}
 	}
 	her.rcs = rcs
 }
 
 func (her *hera) keySchedule(r int) {
-	for st := 0; st < 16; st++ {
-		her.state[st] = (her.state[st] + her.rcs[r][st]) % her.params.GetModulus()
+	for i := 0; i < her.params.GetBlockSize(); i++ {
+		her.state[i] = (her.state[i] + her.rcs[r][i]) % her.params.GetModulus()
 	}
 }
 
@@ -141,7 +136,7 @@ func (her *hera) mixRows() {
 
 func (her *hera) sBoxCube() {
 	p := her.params.GetModulus()
-	for st := 0; st < 16; st++ {
-		her.state[st] = (her.state[st] * her.state[st] % p) * her.state[st] % p
+	for i := 0; i < her.params.GetBlockSize(); i++ {
+		her.state[i] = (her.state[i] * her.state[i] % p) * her.state[i] % p
 	}
 }

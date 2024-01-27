@@ -1,10 +1,13 @@
 package symcips
 
 import (
+	"HHESoK/ckks_integration/utils"
+	"crypto/rand"
 	"encoding/csv"
 	"fmt"
 	"math"
 	"os"
+	"strings"
 )
 
 type Key []uint64
@@ -15,8 +18,33 @@ type Ciphertext []uint64
 type Matrix [][]uint64
 type SBox []uint64
 
-func PrintLog(msg string) {
-	fmt.Printf("\t--- %s\n", msg)
+const DEBUG = false
+
+type logger struct {
+	debug bool
+}
+
+func NewLogger(debug bool) Logger {
+	return &logger{
+		debug: debug,
+	}
+}
+
+type Logger interface {
+	PrintMessage(message string)
+	PrintDataLen(data []uint64)
+}
+
+func (l logger) PrintMessage(message string) {
+	if l.debug {
+		fmt.Printf("\t--- %s\n", message)
+	}
+}
+
+func (l logger) PrintDataLen(data []uint64) {
+	if l.debug {
+		fmt.Printf("Len: %d, Data: %d \n", len(data), data)
+	}
 }
 
 // SaveToFile save the given Plaintext as hexadecimal values to a file
@@ -96,3 +124,79 @@ func ScaleUp(f float64, scaleFactor float64) uint64 {
 func ScaleDown(x uint64, scaleFactor float64) float64 {
 	return float64(x) / scaleFactor
 }
+
+// TestVectorGen to generate random values for test vectors
+func TestVectorGen() {
+	N := 128
+	modulus := uint64(33292289) // Replace with your actual modulus
+	nonces := make([][]byte, N)
+
+	for i := 0; i < N; i++ {
+		nonces[i] = make([]byte, 8)
+		_, err := rand.Read(nonces[i])
+		if err != nil {
+			panic(err)
+		}
+	}
+	fmt.Print("{")
+	for i := 0; i < N; i++ {
+		result := bytesToHexWithModulus(nonces[i], modulus)
+		fmt.Printf("%s, ", result)
+		if (i+1)%4 == 0 {
+			fmt.Printf("\n")
+		}
+	}
+	fmt.Print("}\n")
+}
+
+func bytesToHexWithModulus(data []byte, modulus uint64) string {
+	// Convert bytes to uint64 and take modulus
+	result := make([]uint64, len(data)/8)
+	for i := 0; i < len(data)/8; i++ {
+		result[i] = uint64(data[i*8]) |
+			uint64(data[i*8+1])<<8 |
+			uint64(data[i*8+2])<<16 |
+			uint64(data[i*8+3])<<24 |
+			uint64(data[i*8+4])<<32 |
+			uint64(data[i*8+5])<<40 |
+			uint64(data[i*8+6])<<48 |
+			uint64(data[i*8+7])<<56
+
+		result[i] %= modulus
+	}
+
+	// Convert uint64 to hexadecimal string
+	hexValues := make([]string, len(result))
+	for i, v := range result {
+		hexValues[i] = fmt.Sprintf("%#x", v)
+	}
+
+	// Join hexadecimal values into a string
+	return strings.Join(hexValues, ", ")
+}
+
+// RandomFloatDataGen to generate a matrix of floating point numbers between 0 and 1
+func RandomFloatDataGen(col int, row int) (data [][]float64) {
+	data = make([][]float64, row)
+	for s := 0; s < row; s++ {
+		data[s] = make([]float64, col)
+		for i := 0; i < col; i++ {
+			data[s][i] = utils.RandFloat64(0, 1)
+		}
+	}
+	return
+}
+
+// Scale data to save as []uint64
+//delta := float64(tc.params.GetModulus()) / float64(N)
+//for s := 0; s < optSize; s++ {
+//	plaintext := func() []uint64 {
+//		result := make([]uint64, len(data[s]))
+//		for i, v := range data[s] {
+//			result[i] = symcips.ScaleUp(v, delta)
+//		}
+//		return result
+//	}()
+//	fmt.Println("Len: ", len(plaintext), " - OG: ", data[0])
+//	symcips.Uint64ToHex(plaintext)
+//fmt.Println(">  Encrypt() the data[", s, "]")

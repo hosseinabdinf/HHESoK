@@ -13,6 +13,7 @@ func testString(opName string, p Parameter) string {
 }
 
 func TestPasta3(t *testing.T) {
+	logger := symcips.NewLogger(symcips.DEBUG)
 	for _, tc := range pasta3TestVector {
 		pastaCipher := NewPasta(tc.key, tc.params)
 		encryptor := pastaCipher.NewEncryptor()
@@ -31,20 +32,21 @@ func TestPasta3(t *testing.T) {
 			newPlaintext := encryptor.Decrypt(newCiphertext)
 
 			if reflect.DeepEqual(tc.plaintext, newPlaintext) {
-				symcips.PrintLog("Got the same plaintext, it is working fine.")
+				logger.PrintMessage("Got the same plaintext, it is working fine.")
 			} else {
-				symcips.PrintLog("The plaintext after DEC is different, decryption failure!")
+				logger.PrintMessage("The plaintext after DEC is different, decryption failure!")
 			}
 			if reflect.DeepEqual(tc.expCipherText, newCiphertext) {
-				symcips.PrintLog("Got the same ciphertext, it is working fine.")
+				logger.PrintMessage("Got the same ciphertext, it is working fine.")
 			} else {
-				symcips.PrintLog("The ciphertext after ENC is different, encryption failure!")
+				logger.PrintMessage("The ciphertext after ENC is different, encryption failure!")
 			}
 		})
 	}
 }
 
 func TestPasta4(t *testing.T) {
+	logger := symcips.NewLogger(symcips.DEBUG)
 	for _, tc := range pasta4TestVector {
 		pastaCipher := NewPasta(tc.key, tc.params)
 		encryptor := pastaCipher.NewEncryptor()
@@ -63,14 +65,14 @@ func TestPasta4(t *testing.T) {
 			newPlaintext := encryptor.Decrypt(newCiphertext)
 
 			if reflect.DeepEqual(tc.plaintext, newPlaintext) {
-				symcips.PrintLog("Got the same plaintext, it is working fine.")
+				logger.PrintMessage("Got the same plaintext, it is working fine.")
 			} else {
-				symcips.PrintLog("The plaintext after DEC is different, decryption failure!")
+				logger.PrintMessage("The plaintext after DEC is different, decryption failure!")
 			}
 			if reflect.DeepEqual(tc.expCipherText, newCiphertext) {
-				symcips.PrintLog("Got the same ciphertext, it is working fine.")
+				logger.PrintMessage("Got the same ciphertext, it is working fine.")
 			} else {
-				symcips.PrintLog("The ciphertext after ENC is different, encryption failure!")
+				logger.PrintMessage("The ciphertext after ENC is different, encryption failure!")
 			}
 		})
 	}
