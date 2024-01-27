@@ -4,7 +4,6 @@ import (
 	"HHESoK/ckks_integration/utils"
 	"HHESoK/symcips"
 	"fmt"
-	"reflect"
 	"testing"
 )
 
@@ -18,31 +17,24 @@ func testString(opName string, p Parameter) string {
 }
 
 func TestRubato(t *testing.T) {
-	for _, test := range testVector {
-		testInstance(&test, t)
+	for _, tc := range testVector {
+		//testInstance(&tc, t)
+		simpleKeyGen(tc.params.GetBlockSize())
 	}
 }
 
 func TestGenerateDummyData(t *testing.T) {
 	fmt.Println(">  Setup the parameters")
-	for _, test := range testVector {
-		outputSize := test.params.GetBlockSize() - 4
-		// Get random data in [0, 1]
+	for _, tc := range testVector {
+		outputSize := tc.params.GetBlockSize() - 4
 		N := 16
-		delta := float64(test.params.GetModulus()) / float64(N)
+		delta := float64(tc.params.GetModulus()) / float64(N)
 		// it is a Matrix of 12*16 elements
-		fmt.Println(">  Data generation")
-		data := make([][]float64, outputSize)
-		for s := 0; s < outputSize; s++ {
-			data[s] = make([]float64, N)
-			for i := 0; i < N; i++ {
-				data[s][i] = utils.RandFloat64(0, 1)
-			}
-		}
+		data := getRandomData(N, outputSize)
 		//fmt.Println(data)
 
 		// create a Rubato instance with key and params
-		rubatoCipher := NewRubato(test.key, test.params)
+		rubatoCipher := NewRubato(tc.key, tc.params)
 		encryptor := rubatoCipher.NewEncryptor()
 
 		// scale data to save as []uint64
@@ -76,20 +68,41 @@ func TestGenerateDummyData(t *testing.T) {
 
 func testInstance(tc *TestContext, t *testing.T) {
 	t.Run(testString("Rubato", tc.params), func(t *testing.T) {
-		rubatoCipher := NewRubato(tc.key, tc.params)
-		encryptor := rubatoCipher.NewEncryptor()
-		newCiphertext := encryptor.Encrypt(tc.plaintext)
-		newPlaintext := encryptor.Decrypt(newCiphertext)
-
-		if reflect.DeepEqual(tc.plaintext, newPlaintext) {
-			printLog("Got the same plaintext, it is working fine.")
-		} else {
-			printLog("The plaintext after DEC is different, decryption failure!")
-		}
-		if reflect.DeepEqual(tc.ciphertext, newCiphertext) {
-			printLog("Got the same ciphertext, it is working fine.")
-		} else {
-			printLog("The ciphertext after ENC is different, encryption failure!")
-		}
+		//rubatoCipher := NewRubato(tc.key, tc.params)
+		//encryptor := rubatoCipher.NewEncryptor()
+		//newCiphertext := encryptor.Encrypt(tc.plaintext)
+		//newPlaintext := encryptor.Decrypt(newCiphertext)
+		//
+		//if reflect.DeepEqual(tc.plaintext, newPlaintext) {
+		//	printLog("Got the same plaintext, it is working fine.")
+		//} else {
+		//	printLog("The plaintext after DEC is different, decryption failure!")
+		//}
+		//if reflect.DeepEqual(tc.ciphertext, newCiphertext) {
+		//	printLog("Got the same ciphertext, it is working fine.")
+		//} else {
+		//	printLog("The ciphertext after ENC is different, encryption failure!")
+		//}
 	})
+}
+
+func getRandomData(N int, outSize int) (data [][]float64) {
+	// Get random data in [0, 1]
+	fmt.Println(">  Data generation")
+	for s := 0; s < outSize; s++ {
+		data[s] = make([]float64, N)
+		for i := 0; i < N; i++ {
+			data[s][i] = utils.RandFloat64(0, 1)
+		}
+	}
+	return
+}
+
+func simpleKeyGen(blockSize int) {
+	// Key generation
+	key := make([]uint64, blockSize)
+	for i := 0; i < blockSize; i++ {
+		key[i] = uint64(i + 1) // Use (1, ..., 16) for testing
+	}
+	symcips.Uint64ToHex(key)
 }

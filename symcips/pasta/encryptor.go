@@ -27,7 +27,6 @@ func (enc encryptor) Encrypt(plaintext symcips.Plaintext) symcips.Ciphertext {
 
 	for b := uint64(0); b < uint64(numBlock); b++ {
 		keyStream := enc.pas.keyStream(nonce, b)
-		// symcips.Uint64ToHex(keyStream) // for debug
 		for i := b * plainSize; i < (b+1)*plainSize && i < size; i++ {
 			ciphertext[i] = (ciphertext[i] + keyStream[i-b*plainSize]) % modulus
 		}

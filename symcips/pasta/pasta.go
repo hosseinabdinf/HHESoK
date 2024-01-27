@@ -13,17 +13,16 @@ type Pasta interface {
 
 type pasta struct {
 	params       Parameter
-	shake128     sha3.ShakeHash
+	shake        sha3.ShakeHash
 	secretKey    symcips.Key
 	state1       symcips.Block
 	state2       symcips.Block
-	rounds       int
 	p            uint64
 	maxPrimeSize uint64
 }
 
 // NewPasta return a new instance of pasta cipher
-func NewPasta(secretKey symcips.Key, params Parameter, r int) Pasta {
+func NewPasta(secretKey symcips.Key, params Parameter) Pasta {
 	if len(secretKey) != params.GetKeySize() {
 		panic("Invalid Key Length!")
 	}
@@ -47,11 +46,10 @@ func NewPasta(secretKey symcips.Key, params Parameter, r int) Pasta {
 	// create a new pasta instance
 	pas := &pasta{
 		params:       params,
-		shake128:     nil,
+		shake:        nil,
 		secretKey:    secretKey,
 		state1:       state1,
 		state2:       state2,
-		rounds:       r,
 		p:            params.GetModulus(),
 		maxPrimeSize: mps,
 	}
@@ -70,14 +68,16 @@ func (pas *pasta) prepareOneBlock() {
 
 // preProcess make the XOF and matrices and vectors
 func (pas *pasta) preProcess(nonce uint64, counter uint64) {
-	// todo: implement this function
+	// todo: check this one!! need to be fixed
+	// todo: for now we are not using it!
+	numRounds := pas.params.GetRounds()
 	pas.initShake(nonce, counter)
-	mats1 := make(symcips.Vector3D, pas.rounds+1)
-	mats2 := make(symcips.Vector3D, pas.rounds+1)
-	rcs1 := make(symcips.Matrix, pas.rounds+1)
-	rcs2 := make(symcips.Matrix, pas.rounds+1)
+	mats1 := make(symcips.Vector3D, numRounds+1)
+	mats2 := make(symcips.Vector3D, numRounds+1)
+	rcs1 := make(symcips.Matrix, numRounds+1)
+	rcs2 := make(symcips.Matrix, numRounds+1)
 
-	for r := 0; r <= pas.rounds; r++ {
+	for r := 0; r <= numRounds; r++ {
 		mats1[r] = pas.getRandomMatrix()
 		mats2[r] = pas.getRandomMatrix()
 		rcs1[r] = pas.getRandomVector(true)
@@ -95,7 +95,7 @@ func (pas *pasta) keyStream(nonce uint64, counter uint64) symcips.Block {
 	copy(pas.state2, pas.secretKey[ps:])
 
 	// run each round
-	for r := 0; r < pas.rounds; r++ {
+	for r := 0; r < pas.params.GetRounds(); r++ {
 		pas.round(r)
 	}
 
@@ -112,7 +112,8 @@ func (pas *pasta) round(r int) {
 	// choose the s-boxes
 	// Feistel	S`(x)	as the main s-box
 	// Cube 	S(x)	to increase the degree
-	if r == int(pas.rounds)-1 {
+	if r == (pas.params.GetRounds() - 1) {
+		// for the last round
 		pas.sBoxCube(&pas.state1)
 		pas.sBoxCube(&pas.state2)
 	} else {
@@ -265,14 +266,14 @@ func (pas *pasta) initShake(nonce uint64, counter uint64) {
 		panic("Failed to init SHAKE128!")
 	}
 
-	pas.shake128 = shake
+	pas.shake = shake
 }
 
 // GenerateRandomFieldElement generate random field element
 func (pas *pasta) generateRandomFieldElement(allowZero bool) uint64 {
 	var randomByte [8]byte
 	for {
-		if _, err := pas.shake128.Read(randomByte[:]); err != nil {
+		if _, err := pas.shake.Read(randomByte[:]); err != nil {
 			panic("SHAKE128 squeeze failed")
 		}
 
@@ -361,10 +362,9 @@ func (pas *pasta) calculateRow(previousRow, firstRow symcips.Block) symcips.Bloc
 func (pas *pasta) ShallowCopy() Pasta {
 	return &pasta{
 		p:            pas.p,
-		rounds:       pas.rounds,
 		secretKey:    pas.secretKey,
 		maxPrimeSize: pas.maxPrimeSize,
-		shake128:     pas.shake128,
+		shake:        pas.shake,
 		params:       pas.params,
 		state1:       pas.state1,
 		state2:       pas.state2,

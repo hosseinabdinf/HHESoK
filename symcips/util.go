@@ -15,6 +15,10 @@ type Ciphertext []uint64
 type Matrix [][]uint64
 type SBox []uint64
 
+func PrintLog(msg string) {
+	fmt.Printf("\t--- %s\n", msg)
+}
+
 // SaveToFile save the given Plaintext as hexadecimal values to a file
 func (p Plaintext) SaveToFile(name string) {
 	// Open a file for writing

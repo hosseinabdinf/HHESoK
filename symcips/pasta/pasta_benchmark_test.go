@@ -2,17 +2,24 @@ package pasta
 
 import (
 	"HHESoK/symcips"
+	"fmt"
 	"testing"
 )
 
-func BenchmarkPasta(b *testing.B) {
-	for _, decTest := range decTestVector {
-		benchmarkDecryption(&decTest, b)
+func BenchmarkPasta3(b *testing.B) {
+	for _, tc := range pasta3TestVector {
+		benchmarkPasta(&tc, b)
 	}
 }
 
-func benchmarkDecryption(tc *TestContext, b *testing.B) {
-	testString("Pasta/DecryptionTest", tc.params)
+func BenchmarkPasta4(b *testing.B) {
+	for _, tc := range pasta4TestVector {
+		benchmarkPasta(&tc, b)
+	}
+}
+
+func benchmarkPasta(tc *TestContext, b *testing.B) {
+	fmt.Println(testString("Pasta", tc.params))
 	if testing.Short() {
 		b.Skip("skipping benchmark in short mode.")
 	}
@@ -22,7 +29,7 @@ func benchmarkDecryption(tc *TestContext, b *testing.B) {
 	var newCiphertext symcips.Ciphertext
 	b.Run("Pasta/NewPasta", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			pastaCipher = NewPasta(tc.key, tc.params, 3)
+			pastaCipher = NewPasta(tc.key, tc.params)
 		}
 	})
 
