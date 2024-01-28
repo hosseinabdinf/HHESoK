@@ -126,12 +126,9 @@ func ScaleDown(x uint64, scaleFactor float64) float64 {
 }
 
 // TestVectorGen to generate random values for test vectors
-func TestVectorGen() {
-	N := 128
-	modulus := uint64(33292289) // Replace with your actual modulus
-	nonces := make([][]byte, N)
-
-	for i := 0; i < N; i++ {
+func TestVectorGen(n int, modulus uint64) {
+	nonces := make([][]byte, n)
+	for i := 0; i < n; i++ {
 		nonces[i] = make([]byte, 8)
 		_, err := rand.Read(nonces[i])
 		if err != nil {
@@ -139,7 +136,7 @@ func TestVectorGen() {
 		}
 	}
 	fmt.Print("{")
-	for i := 0; i < N; i++ {
+	for i := 0; i < n; i++ {
 		result := bytesToHexWithModulus(nonces[i], modulus)
 		fmt.Printf("%s, ", result)
 		if (i+1)%4 == 0 {
