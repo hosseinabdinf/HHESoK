@@ -1,7 +1,7 @@
 package hera
 
 import (
-	"HHESoK/symcips"
+	"HHESoK"
 	"fmt"
 	"testing"
 )
@@ -12,12 +12,12 @@ func testString(opName string, p Parameter) string {
 }
 
 func TestHera(t *testing.T) {
-	logger := symcips.NewLogger(symcips.DEBUG)
-	for _, tc := range testVector {
+	logger := HHESoK.NewLogger(HHESoK.DEBUG)
+	for _, tc := range TestVector {
 		fmt.Println(testString("HERA", tc.params))
 		heraCipher := NewHera(tc.key, tc.params)
 		encryptor := heraCipher.NewEncryptor()
-		var ciphertext symcips.Ciphertext
+		var ciphertext HHESoK.Ciphertext
 
 		t.Run("HeraEncryptionTest", func(t *testing.T) {
 			ciphertext = encryptor.Encrypt(tc.plaintext)

@@ -1,8 +1,8 @@
 package hera
 
 import (
+	"HHESoK"
 	"HHESoK/ckks_integration/ckks_fv"
-	"HHESoK/symcips"
 )
 
 type TestCase int
@@ -29,13 +29,13 @@ const (
 type TestContext struct {
 	tc         TestCase
 	params     Parameter
-	key        symcips.Key
-	plaintext  symcips.Plaintext
-	ciphertext symcips.Ciphertext
+	key        HHESoK.Key
+	plaintext  HHESoK.Plaintext
+	ciphertext HHESoK.Ciphertext
 }
 
-// Test Vectors
-var testVector = []TestContext{
+// TestVector Test Vectors
+var TestVector = []TestContext{
 	//	HERA 80 bits security
 	{
 		tc: ENC,
@@ -44,12 +44,12 @@ var testVector = []TestContext{
 			Modulus:   ckks_fv.RtFHeraParams[HR80F].PlainModulus,
 			Rounds:    4,
 		},
-		key: symcips.Key{
+		key: HHESoK.Key{
 			0x6d3c611, 0x9d41950, 0x2e14372, 0x9baa181,
 			0x422bf14, 0xebeebc5, 0xaccbfb5, 0x7445893,
 			0x62b4f8, 0x5ff653c, 0x2558d94, 0xb9d1aea,
 			0x4ffbf51, 0xf1dc323, 0xabbc1ac, 0x99cce83},
-		plaintext: symcips.Plaintext{0x4f7ec94, 0x4d8e45a, 0x365cd14, 0x7a459a4,
+		plaintext: HHESoK.Plaintext{0x4f7ec94, 0x4d8e45a, 0x365cd14, 0x7a459a4,
 			0xef484d9, 0xa4ae3f6, 0xdebfb39, 0xce3516,
 			0x2c015c0, 0x92de0c6, 0xea71f98, 0xecc0e0a,
 			0xdb3c8ab, 0xae2b41b, 0xe31504b, 0xaf909a4,
@@ -81,7 +81,7 @@ var testVector = []TestContext{
 			0xbed846a, 0xcd470c0, 0xf4c5c27, 0xfe43a4a,
 			0x9c1f121, 0x689e723, 0x2851f6a, 0x1b0d88e,
 			0x1b38b06, 0xa93f98b, 0x88f60b, 0x641b4a9},
-		ciphertext: symcips.Ciphertext{},
+		ciphertext: HHESoK.Ciphertext{},
 	},
 	{
 		tc: ENC,
@@ -90,11 +90,11 @@ var testVector = []TestContext{
 			Modulus:   ckks_fv.RtFHeraParams[HR80S].PlainModulus,
 			Rounds:    4,
 		},
-		key: symcips.Key{0x84beeb4, 0x2df4e30, 0x9669076, 0x3115ba4,
+		key: HHESoK.Key{0x84beeb4, 0x2df4e30, 0x9669076, 0x3115ba4,
 			0x874f0cb, 0x4331592, 0x34c5300, 0x5f1dd49,
 			0x7574d80, 0xe38c008, 0xfcd0f7, 0xf567c22,
 			0x566eaaa, 0x8a46537, 0x66c422a, 0xd9453ce},
-		plaintext: symcips.Plaintext{0x34e4282, 0xa4a4426, 0x755bb7c, 0xeaf06e1,
+		plaintext: HHESoK.Plaintext{0x34e4282, 0xa4a4426, 0x755bb7c, 0xeaf06e1,
 			0x3fb917a, 0xf8ff31a, 0xcff2d0b, 0xbe18bbf,
 			0xf12e325, 0x39b7de0, 0xb091cd, 0x9ec7a09,
 			0xb26857e, 0x867f044, 0xea5ce3, 0x3ff6dff,
@@ -126,7 +126,7 @@ var testVector = []TestContext{
 			0x265635, 0x8c01e7b, 0xe9f1493, 0x936698b,
 			0xfba3a04, 0x58aacf1, 0x16fcb56, 0x346366a,
 			0x12721e8, 0x750adaf, 0x8a1c799, 0xac4f570},
-		ciphertext: symcips.Ciphertext{},
+		ciphertext: HHESoK.Ciphertext{},
 	},
 	{
 		tc: ENC,
@@ -135,11 +135,11 @@ var testVector = []TestContext{
 			Modulus:   ckks_fv.RtFHeraParams[HR80AF].PlainModulus,
 			Rounds:    4,
 		},
-		key: symcips.Key{0x6e8a, 0x64dbc6, 0xbb2c45, 0xbe69c8,
+		key: HHESoK.Key{0x6e8a, 0x64dbc6, 0xbb2c45, 0xbe69c8,
 			0x16169f7, 0xfa7b7c, 0x13263a9, 0x1a13402,
 			0x18e21ff, 0xc46e7f, 0x1676264, 0x2a8045,
 			0x1f3a4cd, 0x1c8fc4b, 0x25863c, 0x1d9ee07},
-		plaintext: symcips.Plaintext{0x10a2d21, 0x2da472, 0x1e64975, 0x5c636e,
+		plaintext: HHESoK.Plaintext{0x10a2d21, 0x2da472, 0x1e64975, 0x5c636e,
 			0x154c6d1, 0x9c7d2c, 0x13db647, 0xa2e1da,
 			0x8a0292, 0x1c3c802, 0x1d29221, 0xf85583,
 			0x56a45e, 0x6b173f, 0x12bb4b0, 0x4bd67e,
@@ -171,7 +171,7 @@ var testVector = []TestContext{
 			0x16bc7d9, 0x1059003, 0x9f66fc, 0x73737e,
 			0xe592a7, 0xe47342, 0x21ea54, 0xe4fb2,
 			0x9568a1, 0x1efe21, 0x1dd74df, 0x132055a},
-		ciphertext: symcips.Ciphertext{},
+		ciphertext: HHESoK.Ciphertext{},
 	},
 	{
 		tc: ENC,
@@ -180,11 +180,11 @@ var testVector = []TestContext{
 			Modulus:   ckks_fv.RtFHeraParams[HR80AS].PlainModulus,
 			Rounds:    4,
 		},
-		key: symcips.Key{0x85b819, 0x11344b, 0x109583f, 0x6bb6a0,
+		key: HHESoK.Key{0x85b819, 0x11344b, 0x109583f, 0x6bb6a0,
 			0xc31619, 0xd5af0b, 0x1f25bd9, 0x13baa72,
 			0xea531c, 0x1097bfe, 0x1524654, 0x1525b79,
 			0x154cbeb, 0x1ee23a, 0xe93d3, 0x1426558},
-		plaintext: symcips.Plaintext{0x147ba5, 0x1f1c01c, 0xb26f2c, 0x109a3ad,
+		plaintext: HHESoK.Plaintext{0x147ba5, 0x1f1c01c, 0xb26f2c, 0x109a3ad,
 			0x33d1f1, 0x2a007d, 0x4bf742, 0x1f0e2aa,
 			0x14640d0, 0xbbba57, 0xfaba77, 0xd6ec41,
 			0xb5495, 0x1a0d058, 0x18e0ae7, 0x1466eaf,
@@ -216,7 +216,7 @@ var testVector = []TestContext{
 			0x4b51be, 0x969d57, 0xbbdbbb, 0xdb4be2,
 			0x7521bc, 0x1de63c0, 0xac9f3f, 0x14e3c4d,
 			0x7b849b, 0x1cc7922, 0xb4275, 0x158ebf9},
-		ciphertext: symcips.Ciphertext{},
+		ciphertext: HHESoK.Ciphertext{},
 	},
 	//	HERA 128 bits security
 	{
@@ -226,11 +226,11 @@ var testVector = []TestContext{
 			Modulus:   ckks_fv.RtFHeraParams[HR128F].PlainModulus,
 			Rounds:    5,
 		},
-		key: symcips.Key{0x605ae5b, 0x62be1ef, 0x9dc75ea, 0x81e09a7,
+		key: HHESoK.Key{0x605ae5b, 0x62be1ef, 0x9dc75ea, 0x81e09a7,
 			0xf15fcd7, 0xa6c05b8, 0xef3d901, 0x7530002,
 			0x9ba3ea1, 0x7a643fc, 0x3cc3e91, 0xd567b7a,
 			0x94ef7f4, 0x8bf2919, 0x68625cf, 0xd3741ac},
-		plaintext: symcips.Plaintext{0x5363413, 0x56c4780, 0x736d68f, 0xa59c40,
+		plaintext: HHESoK.Plaintext{0x5363413, 0x56c4780, 0x736d68f, 0xa59c40,
 			0xaf2e3e1, 0xf283c83, 0x1ac37bc, 0x9543afd,
 			0x875b9b7, 0xa7443cc, 0x9b97c65, 0x500406f,
 			0x36ad9a1, 0xe00f6a8, 0xedac574, 0x4ed0613,
@@ -262,7 +262,7 @@ var testVector = []TestContext{
 			0xed78ac, 0xdf2e7dc, 0x5b8e7ce, 0x76dbbe0,
 			0x259dbbd, 0xc2f1b29, 0xd1de26c, 0x968b395,
 			0x6af6be6, 0xefd36ff, 0xcf9bcc4, 0xcc395d8},
-		ciphertext: symcips.Ciphertext{},
+		ciphertext: HHESoK.Ciphertext{},
 	},
 	{
 		tc: ENC,
@@ -271,11 +271,11 @@ var testVector = []TestContext{
 			Modulus:   ckks_fv.RtFHeraParams[HR128S].PlainModulus,
 			Rounds:    5,
 		},
-		key: symcips.Key{0xb52bd22, 0xb54da27, 0x8f873e6, 0xeb0707d,
+		key: HHESoK.Key{0xb52bd22, 0xb54da27, 0x8f873e6, 0xeb0707d,
 			0x179bf8d, 0x16265cf, 0x16c0063, 0x7f5f3e5,
 			0xa46fe6c, 0xc8d9217, 0xeea8b32, 0x91f2ff3,
 			0x353e66e, 0x91715a, 0xd98cb57, 0xf4b9fd7},
-		plaintext: symcips.Plaintext{0x84b3d61, 0xed29140, 0x6396c4a, 0x23d4fd4,
+		plaintext: HHESoK.Plaintext{0x84b3d61, 0xed29140, 0x6396c4a, 0x23d4fd4,
 			0x1eae72d, 0x53af326, 0x48e7e7f, 0x401f276,
 			0xacbe5f, 0x31a19a0, 0x9ef8b5e, 0x915dd61,
 			0xd74ef7e, 0xbf2caf, 0xeee35e5, 0x2c3477e,
@@ -307,7 +307,7 @@ var testVector = []TestContext{
 			0x941c671, 0x49eb399, 0xddd56a8, 0x2fde8ba,
 			0x3a8aff, 0x3f91345, 0x6265d41, 0x6f54eb3,
 			0x20aa6a, 0x3c0f2f3, 0x1c0ff7d, 0x9596f3e},
-		ciphertext: symcips.Ciphertext{},
+		ciphertext: HHESoK.Ciphertext{},
 	},
 	{
 		tc: ENC,
@@ -316,11 +316,11 @@ var testVector = []TestContext{
 			Modulus:   ckks_fv.RtFHeraParams[HR128AF].PlainModulus,
 			Rounds:    5,
 		},
-		key: symcips.Key{0x1808681, 0x13578fc, 0x1828cf, 0x1bc1199,
+		key: HHESoK.Key{0x1808681, 0x13578fc, 0x1828cf, 0x1bc1199,
 			0x11aab0, 0x122655c, 0xdde5b5, 0x1c576b0,
 			0x10a2079, 0x10c51ac, 0x184fe01, 0x16cc1e2,
 			0x588629, 0x1b36bbc, 0x7d050a, 0x56f642},
-		plaintext: symcips.Plaintext{0x764370, 0xf7b65d, 0x1e19ecb, 0x15fd92b,
+		plaintext: HHESoK.Plaintext{0x764370, 0xf7b65d, 0x1e19ecb, 0x15fd92b,
 			0x1eee5e8, 0x910386, 0x9c27d, 0x9b87af,
 			0x1ef67e9, 0x14a31d5, 0x8892e9, 0x106bc04,
 			0x132716a, 0x11894ca, 0x1c7408b, 0xca79fc,
@@ -352,7 +352,7 @@ var testVector = []TestContext{
 			0x2ecbf7, 0x176b70f, 0x12dca5c, 0x183a5cf,
 			0x58788c, 0x1675bd5, 0xba896, 0x308ab5,
 			0x1aea379, 0x133b9e4, 0x174b5b9, 0x1dadb7c},
-		ciphertext: symcips.Ciphertext{},
+		ciphertext: HHESoK.Ciphertext{},
 	},
 	{
 		tc: ENC,
@@ -361,11 +361,11 @@ var testVector = []TestContext{
 			Modulus:   ckks_fv.RtFHeraParams[HR128AS].PlainModulus,
 			Rounds:    5,
 		},
-		key: symcips.Key{0xf1741, 0xb46639, 0x1a3ecaa, 0xd42827,
+		key: HHESoK.Key{0xf1741, 0xb46639, 0x1a3ecaa, 0xd42827,
 			0xe35f0b, 0x7536ec, 0x8faabb, 0xd06bf5,
 			0x1d66e2c, 0xa2814, 0x1da6be3, 0xd6cc6e,
 			0xf72639, 0x186cf8c, 0x3c952d, 0x4916d1},
-		plaintext: symcips.Plaintext{0xa7d4b3, 0x9a7af0, 0x1400704, 0x174e573,
+		plaintext: HHESoK.Plaintext{0xa7d4b3, 0x9a7af0, 0x1400704, 0x174e573,
 			0xad9443, 0x11340b, 0x2533b, 0xcb5091,
 			0x23adc3, 0x158cc0d, 0xc60f43, 0x15a5786,
 			0x1dc63d8, 0x17fb74a, 0x174272f, 0x1316b5d,
@@ -397,6 +397,6 @@ var testVector = []TestContext{
 			0xd35df8, 0x1f5e9ae, 0x1b3b46a, 0x168492a,
 			0xb7ea18, 0x15c406, 0x2d6da5, 0x1090f1e,
 			0x1a7d4fa, 0x1e1a0fb, 0x128755, 0x15e83a6},
-		ciphertext: symcips.Ciphertext{},
+		ciphertext: HHESoK.Ciphertext{},
 	},
 }

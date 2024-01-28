@@ -1,7 +1,7 @@
 package pasta
 
 import (
-	"HHESoK/symcips"
+	"HHESoK"
 	"HHESoK/symcips/pasta"
 	"github.com/tuneinsight/lattigo/v4/bfv"
 	"github.com/tuneinsight/lattigo/v4/rlwe"
@@ -12,7 +12,7 @@ type FvPasta interface {
 }
 
 type fv_pasta struct {
-	symmetricSecretKey symcips.Key
+	symmetricSecretKey HHESoK.Key
 	modulus            uint64
 	fvPasParams        FvPastaParameter
 	pas                pasta.Pasta

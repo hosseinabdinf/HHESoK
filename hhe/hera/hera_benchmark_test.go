@@ -1,48 +1,40 @@
 package hera
 
 import (
-	"HHESoK"
-	"fmt"
 	"testing"
 )
 
 func BenchmarkHera(b *testing.B) {
-	for _, tc := range TestVector {
-		benchmarkHera(&tc, b)
-	}
+	benchmarkHera(b)
 }
 
-func benchmarkHera(tc *TestContext, b *testing.B) {
-	fmt.Println(testString("HERA", tc.params))
+func benchmarkHera(b *testing.B) {
+	//fmt.Println(testString("HERA", tc.params))
 	if testing.Short() {
 		b.Skip("skipping benchmark in short mode.")
 	}
 
-	var heraCipher Hera
-	var encryptor Encryptor
-	var newCiphertext HHESoK.Ciphertext
-
 	b.Run("HERA/NewHera", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			heraCipher = NewHera(tc.key, tc.params)
+			//heraCipher = NewHera(tc.key, tc.params)
 		}
 	})
 
 	b.Run("HERA/NewEncryptor", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			encryptor = heraCipher.NewEncryptor()
+			//encryptor = heraCipher.NewEncryptor()
 		}
 	})
 
 	b.Run("HERA/Encrypt", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			newCiphertext = encryptor.Encrypt(tc.plaintext)
+			//newCiphertext = encryptor.Encrypt(tc.plaintext)
 		}
 	})
 
 	b.Run("HERA/Decrypt", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			encryptor.Decrypt(newCiphertext)
+			//encryptor.Decrypt(newCiphertext)
 		}
 	})
 }

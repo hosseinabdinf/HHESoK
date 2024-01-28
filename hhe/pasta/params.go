@@ -1,7 +1,7 @@
 package pasta
 
 import (
-	"HHESoK/symcips"
+	"HHESoK"
 	"HHESoK/symcips/pasta"
 	"github.com/tuneinsight/lattigo/v4/rlwe"
 )
@@ -13,7 +13,7 @@ type FvPastaParameter struct {
 }
 
 type FvParameter struct {
-	secretKey          symcips.Key
+	secretKey          HHESoK.Key
 	params             pasta.Parameter
 	plainMod           uint64
 	modDegree          uint64

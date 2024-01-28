@@ -1,8 +1,8 @@
 package hera
 
 import (
+	"HHESoK"
 	"HHESoK/ckks_integration/ckks_fv"
-	"HHESoK/symcips"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -13,19 +13,19 @@ type Hera interface {
 type hera struct {
 	params    Parameter
 	shake     sha3.ShakeHash
-	secretKey symcips.Key
-	state     symcips.Block
-	rcs       symcips.Matrix
+	secretKey HHESoK.Key
+	state     HHESoK.Block
+	rcs       HHESoK.Matrix
 	p         uint64
 }
 
 // NewHera return a new instance of Hera cipher
-func NewHera(secretKey symcips.Key, params Parameter) Hera {
+func NewHera(secretKey HHESoK.Key, params Parameter) Hera {
 	if len(secretKey) != params.GetBlockSize() {
 		panic("Invalid Key Length!")
 	}
 
-	state := make(symcips.Block, params.GetBlockSize())
+	state := make(HHESoK.Block, params.GetBlockSize())
 	her := &hera{
 		params:    params,
 		shake:     nil,
@@ -41,7 +41,7 @@ func (her *hera) NewEncryptor() Encryptor {
 	return &encryptor{her: *her}
 }
 
-func (her *hera) keyStream(nonce []byte) (ks symcips.Block) {
+func (her *hera) keyStream(nonce []byte) (ks HHESoK.Block) {
 	// init Shake256
 	her.initShake(nonce)
 	// init state with values between 1 and BlockSize

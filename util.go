@@ -1,4 +1,4 @@
-package symcips
+package HHESoK
 
 import (
 	"HHESoK/ckks_integration/utils"

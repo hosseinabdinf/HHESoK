@@ -1,13 +1,13 @@
 package pasta
 
 import (
-	"HHESoK/symcips"
+	"HHESoK"
 	"math"
 )
 
 type Encryptor interface {
-	Encrypt(plaintext symcips.Plaintext) symcips.Ciphertext
-	Decrypt(ciphertext symcips.Ciphertext) symcips.Plaintext
+	Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext
+	Decrypt(ciphertext HHESoK.Ciphertext) HHESoK.Plaintext
 }
 
 type encryptor struct {
@@ -15,14 +15,14 @@ type encryptor struct {
 }
 
 // Encrypt plaintext
-func (enc encryptor) Encrypt(plaintext symcips.Plaintext) symcips.Ciphertext {
+func (enc encryptor) Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext {
 	var nonce = uint64(123456789)
 	var size = uint64(len(plaintext))
 	var plainSize = uint64(enc.pas.params.GetPlainSize())
 	var numBlock = math.Ceil(float64(size / plainSize))
 	var modulus = enc.pas.params.GetModulus()
 
-	ciphertext := make(symcips.Ciphertext, size)
+	ciphertext := make(HHESoK.Ciphertext, size)
 	copy(ciphertext, plaintext)
 
 	for b := uint64(0); b < uint64(numBlock); b++ {
@@ -36,7 +36,7 @@ func (enc encryptor) Encrypt(plaintext symcips.Plaintext) symcips.Ciphertext {
 }
 
 // Decrypt ciphertext
-func (enc encryptor) Decrypt(ciphertext symcips.Ciphertext) symcips.Plaintext {
+func (enc encryptor) Decrypt(ciphertext HHESoK.Ciphertext) HHESoK.Plaintext {
 	var nonce uint64 = 123456789
 	var size = uint64(len(ciphertext))
 	var plainSize = uint64(enc.pas.params.GetPlainSize())
@@ -44,7 +44,7 @@ func (enc encryptor) Decrypt(ciphertext symcips.Ciphertext) symcips.Plaintext {
 	var numBlock = uint64(math.Ceil(float64(size / cipherSize)))
 	var modulus = enc.pas.params.GetModulus()
 
-	plaintext := make(symcips.Plaintext, size)
+	plaintext := make(HHESoK.Plaintext, size)
 	copy(plaintext, ciphertext)
 
 	var b uint64 = 0

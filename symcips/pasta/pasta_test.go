@@ -1,7 +1,7 @@
 package pasta
 
 import (
-	"HHESoK/symcips"
+	"HHESoK"
 	"fmt"
 	"reflect"
 	"testing"
@@ -13,11 +13,11 @@ func testString(opName string, p Parameter) string {
 }
 
 func TestPasta3(t *testing.T) {
-	logger := symcips.NewLogger(symcips.DEBUG)
+	logger := HHESoK.NewLogger(HHESoK.DEBUG)
 	for _, tc := range pasta3TestVector {
 		pastaCipher := NewPasta(tc.key, tc.params)
 		encryptor := pastaCipher.NewEncryptor()
-		var ciphertext symcips.Ciphertext
+		var ciphertext HHESoK.Ciphertext
 
 		t.Run("PastaEncryptionTest", func(t *testing.T) {
 			ciphertext = encryptor.Encrypt(tc.plaintext)
@@ -46,11 +46,11 @@ func TestPasta3(t *testing.T) {
 }
 
 func TestPasta4(t *testing.T) {
-	logger := symcips.NewLogger(symcips.DEBUG)
+	logger := HHESoK.NewLogger(HHESoK.DEBUG)
 	for _, tc := range pasta4TestVector {
 		pastaCipher := NewPasta(tc.key, tc.params)
 		encryptor := pastaCipher.NewEncryptor()
-		var ciphertext symcips.Ciphertext
+		var ciphertext HHESoK.Ciphertext
 
 		t.Run("PastaEncryptionTest", func(t *testing.T) {
 			ciphertext = encryptor.Encrypt(tc.plaintext)

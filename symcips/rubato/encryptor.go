@@ -1,28 +1,28 @@
 package rubato
 
 import (
-	"HHESoK/symcips"
+	"HHESoK"
 	"encoding/binary"
 	"fmt"
 	"math"
 )
 
 type Encryptor interface {
-	Encrypt(plaintext symcips.Plaintext) symcips.Ciphertext
-	Decrypt(ciphertext symcips.Ciphertext) symcips.Plaintext
+	Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext
+	Decrypt(ciphertext HHESoK.Ciphertext) HHESoK.Plaintext
 }
 
 type encryptor struct {
 	rub rubato
 }
 
-func (enc encryptor) Encrypt(plaintext symcips.Plaintext) symcips.Ciphertext {
+func (enc encryptor) Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext {
 	p := enc.rub.params.GetModulus()
 	blockSize := enc.rub.params.GetBlockSize()
 	outputSize := enc.rub.params.GetBlockSize() - 4
 	size := len(plaintext)
 	numBlock := int(math.Ceil(float64(size / outputSize)))
-	if symcips.DEBUG {
+	if HHESoK.DEBUG {
 		fmt.Printf("=== Number of Block: %d\n", numBlock)
 	}
 	// Nonce and Counter
@@ -35,11 +35,11 @@ func (enc encryptor) Encrypt(plaintext symcips.Plaintext) symcips.Ciphertext {
 	}
 	counter := make([]byte, 8)
 	// Ciphertext
-	ciphertext := make(symcips.Ciphertext, size)
+	ciphertext := make(HHESoK.Ciphertext, size)
 	copy(ciphertext, plaintext)
 	// Keystream
 	for i := 0; i < numBlock; i++ {
-		z := make(symcips.Block, outputSize)
+		z := make(HHESoK.Block, outputSize)
 		binary.BigEndian.PutUint64(counter, uint64(i+1))
 		// counter mode
 		copy(z, enc.rub.keyStream(nonces[i], counter))
@@ -49,13 +49,13 @@ func (enc encryptor) Encrypt(plaintext symcips.Plaintext) symcips.Ciphertext {
 	return ciphertext
 }
 
-func (enc encryptor) Decrypt(ciphertext symcips.Ciphertext) symcips.Plaintext {
+func (enc encryptor) Decrypt(ciphertext HHESoK.Ciphertext) HHESoK.Plaintext {
 	p := enc.rub.params.GetModulus()
 	blockSize := enc.rub.params.GetBlockSize()
 	outputSize := enc.rub.params.GetBlockSize() - 4
 	size := len(ciphertext)
 	numBlock := int(math.Ceil(float64(size / outputSize)))
-	if symcips.DEBUG {
+	if HHESoK.DEBUG {
 		fmt.Printf("=== Number of Block: %d\n", numBlock)
 	}
 	// Nonce and Counter
@@ -68,11 +68,11 @@ func (enc encryptor) Decrypt(ciphertext symcips.Ciphertext) symcips.Plaintext {
 	}
 	counter := make([]byte, 8)
 	// Ciphertext
-	plaintext := make(symcips.Plaintext, size)
+	plaintext := make(HHESoK.Plaintext, size)
 	copy(plaintext, ciphertext)
 	// Keystream
 	for i := 0; i < numBlock; i++ {
-		z := make(symcips.Block, outputSize)
+		z := make(HHESoK.Block, outputSize)
 		binary.BigEndian.PutUint64(counter, uint64(i+1))
 		// counter mode
 		copy(z, enc.rub.keyStream(nonces[i], counter))

@@ -1,7 +1,7 @@
 package rubato
 
 import (
-	"HHESoK/symcips"
+	"HHESoK"
 	"fmt"
 	"testing"
 )
@@ -12,12 +12,12 @@ func testString(opName string, p Parameter) string {
 }
 
 func TestRubato(t *testing.T) {
-	logger := symcips.NewLogger(symcips.DEBUG)
+	logger := HHESoK.NewLogger(HHESoK.DEBUG)
 	for _, tc := range testVector {
 		fmt.Println(testString("Rubato", tc.params))
 		rubatoCipher := NewRubato(tc.key, tc.params)
 		encryptor := rubatoCipher.NewEncryptor()
-		var ciphertext symcips.Ciphertext
+		var ciphertext HHESoK.Ciphertext
 
 		t.Run("RubatoEncryptionTest", func(t *testing.T) {
 			ciphertext = encryptor.Encrypt(tc.plaintext)

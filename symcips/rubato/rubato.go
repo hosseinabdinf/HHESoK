@@ -1,10 +1,10 @@
 package rubato
 
 import (
+	"HHESoK"
 	"HHESoK/ckks_integration/ckks_fv"
 	"HHESoK/ckks_integration/ring"
 	"HHESoK/ckks_integration/utils"
-	"HHESoK/symcips"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -15,20 +15,20 @@ type Rubato interface {
 type rubato struct {
 	params    Parameter
 	shake     sha3.ShakeHash
-	secretKey symcips.Key
-	state     symcips.Block
-	rcs       symcips.Matrix
+	secretKey HHESoK.Key
+	state     HHESoK.Block
+	rcs       HHESoK.Matrix
 	p         uint64
 	sampler   *ring.GaussianSampler
 }
 
 // NewRubato return a new instance of Rubato cipher
-func NewRubato(secretKey symcips.Key, params Parameter) Rubato {
+func NewRubato(secretKey HHESoK.Key, params Parameter) Rubato {
 	if len(secretKey) != params.GetBlockSize() {
 		panic("Invalid Key Length!")
 	}
 
-	state := make(symcips.Block, params.GetBlockSize())
+	state := make(HHESoK.Block, params.GetBlockSize())
 	rub := &rubato{
 		params:    params,
 		shake:     nil,
@@ -46,7 +46,7 @@ func (rub *rubato) NewEncryptor() Encryptor {
 }
 
 // keyStream returns a vector of [BlockSize - 4][uint64] elements as key stream
-func (rub *rubato) keyStream(nonce []byte, counter []byte) (ks symcips.Block) {
+func (rub *rubato) keyStream(nonce []byte, counter []byte) (ks HHESoK.Block) {
 	p := rub.params.GetModulus()
 	rounds := rub.params.GetRounds()
 	blockSize := rub.params.GetBlockSize()
@@ -117,7 +117,7 @@ func (rub *rubato) generateRCs() {
 	p := rub.params.GetModulus()
 	rounds := rub.params.GetRounds()
 	// generate round constant and then calculate rc = rc * k % p for ARK function
-	rcs := make(symcips.Matrix, rounds+1)
+	rcs := make(HHESoK.Matrix, rounds+1)
 	for r := 0; r <= rounds; r++ {
 		rcs[r] = make([]uint64, blockSize)
 		for i := 0; i < blockSize; i++ {
@@ -130,7 +130,7 @@ func (rub *rubato) generateRCs() {
 func (rub *rubato) linearLayer() {
 	blockSize := len(rub.state)
 	p := rub.params.GetModulus()
-	buf := make(symcips.Block, blockSize)
+	buf := make(HHESoK.Block, blockSize)
 
 	if blockSize == 16 {
 		// MixColumns
@@ -215,7 +215,7 @@ func (rub *rubato) linearLayer() {
 func (rub *rubato) sBoxFeistel() {
 	p := rub.params.GetModulus()
 	blockSize := rub.params.GetBlockSize()
-	buf := make(symcips.Block, blockSize)
+	buf := make(HHESoK.Block, blockSize)
 
 	for i := 0; i < blockSize; i++ {
 		buf[i] = rub.state[i]

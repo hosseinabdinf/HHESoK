@@ -1,6 +1,8 @@
 package pasta
 
-import "HHESoK/symcips"
+import (
+	"HHESoK"
+)
 
 type TestCase int
 
@@ -12,9 +14,9 @@ const (
 type TestContext struct {
 	tc            TestCase
 	params        Parameter
-	key           symcips.Key
-	plaintext     symcips.Plaintext
-	expCipherText symcips.Ciphertext
+	key           HHESoK.Key
+	plaintext     HHESoK.Plaintext
+	expCipherText HHESoK.Ciphertext
 }
 
 // Decryption Test Vectors
@@ -28,7 +30,7 @@ var pasta3TestVector = []TestContext{
 			CipherSize: 128,
 			Modulus:    65537,
 		},
-		key: symcips.Key{
+		key: HHESoK.Key{
 			0x07a30, 0x0cfe2, 0x03bbb, 0x06ab7, 0x0de0b, 0x0c36c, 0x01c39,
 			0x019e0, 0x0e09c, 0x04441, 0x0c560, 0x00fd4, 0x0c611, 0x0a3fd,
 			0x0d408, 0x01b17, 0x0fa02, 0x054ea, 0x0afeb, 0x0193b, 0x0b6fa,
@@ -66,7 +68,7 @@ var pasta3TestVector = []TestContext{
 			0x07d5a, 0x02d4, 0x06c6c, 0x0ea76, 0x09af5, 0x0bea6, 0x08eea,
 			0x0fbb6, 0x09e45, 0x0e9db, 0x0d106, 0x0e7fd, 0x04ddf, 0x08bb8,
 			0x0a3a4, 0x03bcd, 0x036d9, 0x05acf},
-		plaintext: symcips.Plaintext{
+		plaintext: HHESoK.Plaintext{
 			0x0a562, 0x0f020, 0x09ae9, 0x04070, 0x0ad24, 0x044e3, 0x09e05,
 			0x00f43, 0x0e8be, 0x0890e, 0x0b1f0, 0x08ccb, 0x0a2e9, 0x0ffe9,
 			0x0a3b5, 0x02d13, 0x09740, 0x05c4a, 0x03a94, 0x0a6b8, 0x0b31d,
@@ -86,7 +88,7 @@ var pasta3TestVector = []TestContext{
 			0x01c71, 0x01eea, 0x007b1, 0x0df37, 0x0d01d, 0x06f53, 0x0957b,
 			0x0479e, 0x0ecb6, 0x08c2a, 0x0e56d, 0x05026, 0x07ec2, 0x09f77,
 			0x0824b, 0x07295},
-		expCipherText: symcips.Ciphertext{
+		expCipherText: HHESoK.Ciphertext{
 			0x01c4f, 0x0e3e4, 0x08fe2, 0x0d7db, 0x05594, 0x05c72, 0x0962a,
 			0x02c3c, 0x0b3dd, 0x07975, 0x0928b, 0x01024, 0x0632e, 0x07702,
 			0x05ca1, 0x08e2d, 0x09b4c, 0x00747, 0x0d484, 0x005ad, 0x0674c,
@@ -115,7 +117,7 @@ var pasta3TestVector = []TestContext{
 			CipherSize: 128,
 			Modulus:    8088322049,
 		},
-		key: symcips.Key{
+		key: HHESoK.Key{
 			0x02d65ac52, 0x1c6b45d1c, 0x1cb39041d, 0x0a114487b, 0x1bd58169e,
 			0x06687bfc2, 0x0f2ca10ae, 0x08147165f, 0x145bd33c0, 0x1d93385c2,
 			0x045108f23, 0x0d464ef68, 0x162009aed, 0x0bb4cf340, 0x0a963c1ee,
@@ -168,7 +170,7 @@ var pasta3TestVector = []TestContext{
 			0x114da5af1, 0x08f6e58d0, 0x1a213e8fd, 0x14c8dc340, 0x185b0a047,
 			0x10c37657d, 0x19f1f6c3d, 0x15bd1ced2, 0x178b6d3d0, 0x0db1595cc,
 			0x0bb77980e},
-		plaintext: symcips.Plaintext{
+		plaintext: HHESoK.Plaintext{
 			0x1a1b65740, 0x046fff878, 0x1a244787c, 0x19b9adc20, 0x1cb4417fa,
 			0x079387978, 0x0efaefb7c, 0x189c025af, 0x1424aeb2e, 0x123f02976,
 			0x1804ee8ee, 0x12063c49e, 0x029590584, 0x147c72676, 0x18c4253a3,
@@ -195,7 +197,7 @@ var pasta3TestVector = []TestContext{
 			0x089d0975f, 0x18ba93711, 0x17953e281, 0x161c66a72, 0x13cee6a6b,
 			0x1893dcad2, 0x14800f497, 0x1cda13962, 0x1c8a89771, 0x0c19327b1,
 			0x19b36ca83, 0x02a742bdf, 0x14f43dead},
-		expCipherText: symcips.Ciphertext{
+		expCipherText: HHESoK.Ciphertext{
 			0x10ae630f6, 0x1b342593c, 0x1a22703a3, 0x11278da7e, 0x0b485f348,
 			0x06a4c80be, 0x1b3884552, 0x0f609df0d, 0x0127dd394, 0x01f442434,
 			0x083aa9d7e, 0x1e0a5397c, 0x11ff33a95, 0x0caa10205, 0x0dd55c747,
@@ -231,7 +233,7 @@ var pasta3TestVector = []TestContext{
 			CipherSize: 128,
 			Modulus:    1096486890805657601,
 		},
-		key: symcips.Key{
+		key: HHESoK.Key{
 			0x892f9ff42160c81, 0xa652a61d10eabf3, 0x76bb71c0ddc0c06,
 			0xcd4219dc5300904, 0xb555b02f174ea12, 0xaf3a4ea03c081fd,
 			0x2e5ca6dc0c3122a, 0x73c7bb66bee9643, 0x68568756417a3da,
@@ -318,7 +320,7 @@ var pasta3TestVector = []TestContext{
 			0x749b40188817a03, 0x16b02668d56a1e8, 0xab13d13e5bda090,
 			0x183c5893ffc193b, 0xe912d72bb7f9e53, 0xa861731333ecb85,
 			0xca48bde9146c726},
-		plaintext: symcips.Plaintext{
+		plaintext: HHESoK.Plaintext{
 			0xc38bc593b684d35, 0xa56b31c9bad5eb8, 0x8510b47f0eb5ec8,
 			0x68772a2aaa6cec1, 0xf0f8a3f70be3430, 0xcd3c585462e9cfc,
 			0x876445b524c763d, 0xa6985641dda19a6, 0x3cfd54942ff5f5a,
@@ -362,7 +364,7 @@ var pasta3TestVector = []TestContext{
 			0x92b4643858efe21, 0x95a127e8c5fd9dd, 0xd7132ff88f46df1,
 			0xb775005a72d58b5, 0xdfe047acbd17e0a, 0x8e840ffed351598,
 			0x3634981e76cf165, 0x0606dea452c7ac9},
-		expCipherText: symcips.Ciphertext{
+		expCipherText: HHESoK.Ciphertext{
 			0x32a4ba9024be5d4, 0xe8138ae01a5041a, 0xc617ed6a9fda31d,
 			0x0b336acb93fa88c, 0x5587b75ea723a0b, 0x511fc73deab089e,
 			0x0fa145a9fdecc85, 0x6ccb3a489ad23f7, 0xb81577ff440ef1c,
@@ -419,7 +421,7 @@ var pasta4TestVector = []TestContext{
 			CipherSize: 32,
 			Modulus:    65537,
 		},
-		key: symcips.Key{
+		key: HHESoK.Key{
 			0x07a30, 0x0cfe2, 0x03bbb, 0x06ab7, 0x0de0b, 0x0c36c, 0x01c39,
 			0x019e0, 0x0e09c, 0x04441, 0x0c560, 0x00fd4, 0x0c611, 0x0a3fd,
 			0x0d408, 0x01b17, 0x0fa02, 0x054ea, 0x0afeb, 0x0193b, 0x0b6fa,
@@ -430,13 +432,13 @@ var pasta4TestVector = []TestContext{
 			0x06c84, 0x008ef, 0x02abc, 0x03fdf, 0x0ddaf, 0x028c7, 0x0ded4,
 			0x02c47, 0x03132, 0x0101e, 0x0b302, 0x076e1, 0x00261, 0x01272,
 			0x06938},
-		plaintext: symcips.Plaintext{
+		plaintext: HHESoK.Plaintext{
 			0x0a5b9, 0x08782, 0x0ec78, 0x04b44, 0x07963, 0x01b15, 0x03c0f,
 			0x0bd73, 0x0baf9, 0x03c3a, 0x04fe3, 0x0e3c6, 0x0bf0f, 0x08360,
 			0x0de42, 0x0f4f8, 0x011c7, 0x05a3a, 0x04591, 0x09836, 0x0f6d7,
 			0x014cf, 0x095b6, 0x012a9, 0x0b189, 0x0f895, 0x0d248, 0x0b5d5,
 			0x09a88, 0x0a031, 0x01ba1, 0x038f3},
-		expCipherText: symcips.Ciphertext{
+		expCipherText: HHESoK.Ciphertext{
 			0x01c4f, 0x0e3e4, 0x08fe2, 0x0d7db, 0x05594, 0x05c72, 0x0962a,
 			0x02c3c, 0x0b3dd, 0x07975, 0x0928b, 0x01024, 0x0632e, 0x07702,
 			0x05ca1, 0x08e2d, 0x09b4c, 0x00747, 0x0d484, 0x005ad, 0x0674c,
@@ -451,7 +453,7 @@ var pasta4TestVector = []TestContext{
 			CipherSize: 32,
 			Modulus:    8088322049,
 		},
-		key: symcips.Key{
+		key: HHESoK.Key{
 			0x02d65ac52, 0x1c6b45d1c, 0x1cb39041d, 0x0a114487b, 0x1bd58169e,
 			0x06687bfc2, 0x0f2ca10ae, 0x08147165f, 0x145bd33c0, 0x1d93385c2,
 			0x045108f23, 0x0d464ef68, 0x162009aed, 0x0bb4cf340, 0x0a963c1ee,
@@ -465,7 +467,7 @@ var pasta4TestVector = []TestContext{
 			0x1c26ea8ed, 0x059002810, 0x0fa25328b, 0x12b6e9cec, 0x0b4833bbc,
 			0x09b81028c, 0x0b34aca5d, 0x14222b758, 0x11eb0c39f, 0x0507b4400,
 			0x030d2efb0, 0x127eba731, 0x1b8a7492f, 0x07bff1aba},
-		plaintext: symcips.Plaintext{
+		plaintext: HHESoK.Plaintext{
 			0x0a9d7ee71, 0x0c90649e1, 0x1d7c84c0c, 0x0ff157150, 0x08e504486,
 			0x12fd420d3, 0x01a765891, 0x15fb5d252, 0x16d7167b2, 0x1a7b55501,
 			0x015f940f9, 0x1d0b529fd, 0x0dbe47bdd, 0x0982689f2, 0x12c12edd6,
@@ -473,7 +475,7 @@ var pasta4TestVector = []TestContext{
 			0x1b6448ad4, 0x00d642b16, 0x15d8d4f73, 0x153e9e398, 0x13e649512,
 			0x00c4ab812, 0x06fa9952e, 0x01b98d1cb, 0x1bbbecba9, 0x02af6a0f0,
 			0x04d186add, 0x0fec36c9f},
-		expCipherText: symcips.Ciphertext{
+		expCipherText: HHESoK.Ciphertext{
 			0x10ae630f6, 0x1b342593c, 0x1a22703a3, 0x11278da7e, 0x0b485f348,
 			0x06a4c80be, 0x1b3884552, 0x0f609df0d, 0x0127dd394, 0x01f442434,
 			0x083aa9d7e, 0x1e0a5397c, 0x11ff33a95, 0x0caa10205, 0x0dd55c747,
@@ -490,7 +492,7 @@ var pasta4TestVector = []TestContext{
 			CipherSize: 32,
 			Modulus:    1096486890805657601,
 		},
-		key: symcips.Key{
+		key: HHESoK.Key{
 			0x892f9ff42160c81, 0xa652a61d10eabf3, 0x76bb71c0ddc0c06,
 			0xcd4219dc5300904, 0xb555b02f174ea12, 0xaf3a4ea03c081fd,
 			0x2e5ca6dc0c3122a, 0x73c7bb66bee9643, 0x68568756417a3da,
@@ -513,7 +515,7 @@ var pasta4TestVector = []TestContext{
 			0x699f6fe0bb1d5e9, 0x5462145417efe53, 0x5620afd8fbec20c,
 			0x299441cee16006b, 0x9024a5c56a850b3, 0x7e1c8b36109665e,
 			0xe9309b3e7aee84e},
-		plaintext: symcips.Plaintext{
+		plaintext: HHESoK.Plaintext{
 			0x2aa5d63323b492e, 0x2c446aca8382269, 0x65d6cf211ad468f,
 			0x4f997af101353dd, 0x72221017a1e3cf1, 0x4e58a96f11cc1aa,
 			0x7f73eef090cb64d, 0xe69f4a33955927f, 0xc292e2153508085,
@@ -525,7 +527,7 @@ var pasta4TestVector = []TestContext{
 			0x46ca45df444df89, 0x2bd3b108c679045, 0x57bd4754f3b7658,
 			0x998b49ccb600a3c, 0xea09f24b56715ff, 0x254f9248660345e,
 			0xbcf4a6f51de5192, 0x0e947999e1a2462},
-		expCipherText: symcips.Ciphertext{
+		expCipherText: HHESoK.Ciphertext{
 			0x32a4ba9024be5d4, 0xe8138ae01a5041a, 0xc617ed6a9fda31d,
 			0x0b336acb93fa88c, 0x5587b75ea723a0b, 0x511fc73deab089e,
 			0x0fa145a9fdecc85, 0x6ccb3a489ad23f7, 0xb81577ff440ef1c,
