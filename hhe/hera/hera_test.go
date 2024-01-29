@@ -15,18 +15,14 @@ func testString(opName string, p Parameter) string {
 }
 
 func printDebug(params *ckks_fv.Parameters, ciphertext *ckks_fv.Ciphertext, valuesWant []complex128, decryptor ckks_fv.CKKSDecryptor, encoder ckks_fv.CKKSEncoder) {
-
 	valuesTest := encoder.DecodeComplex(decryptor.DecryptNew(ciphertext), params.LogSlots())
 	logSlots := params.LogSlots()
 	sigma := params.Sigma()
-
 	fmt.Printf("Level: %d (logQ = %d)\n", ciphertext.Level(), params.LogQLvl(ciphertext.Level()))
 	fmt.Printf("Scale: 2^%f\n", math.Log2(ciphertext.Scale()))
 	fmt.Printf("ValuesTest: %6.10f %6.10f %6.10f %6.10f...\n", valuesTest[0], valuesTest[1], valuesTest[2], valuesTest[3])
 	fmt.Printf("ValuesWant: %6.10f %6.10f %6.10f %6.10f...\n", valuesWant[0], valuesWant[1], valuesWant[2], valuesWant[3])
-
 	precStats := ckks_fv.GetPrecisionStats(params, encoder, nil, valuesWant, valuesTest, logSlots, sigma)
-
 	fmt.Println(precStats.String())
 }
 
@@ -35,7 +31,8 @@ func TestHera(t *testing.T) {
 	numRound := 5
 	paramIndex := 1
 	radix := 0
-	fullCoeffs := false
+	fullCOEFF := false
+	dataSize := 128
 
 	var err error
 
@@ -75,8 +72,8 @@ func TestHera(t *testing.T) {
 		stcModDown = ckks_fv.HeraModDownParams128[paramIndex].StCModDown
 	}
 
-	// fullCoeffs denotes whether full coefficients are used for data encoding
-	if fullCoeffs {
+	// fullCOEFF denotes whether full coefficients are used for data encoding
+	if fullCOEFF {
 		params.SetLogFVSlots(params.LogN())
 	} else {
 		params.SetLogFVSlots(params.LogSlots())
@@ -97,7 +94,7 @@ func TestHera(t *testing.T) {
 	pDcds := fvEncoder.GenSlotToCoeffMatFV(radix)
 	rotationsStC := kgen.GenRotationIndexesForSlotsToCoeffsMat(pDcds)
 	rotations := append(rotationsHalfBoot, rotationsStC...)
-	if !fullCoeffs {
+	if !fullCOEFF {
 		rotations = append(rotations, params.Slots()/2)
 	}
 	rotkeys := kgen.GenRotationKeysForRotations(rotations, true, sk)
@@ -108,56 +105,63 @@ func TestHera(t *testing.T) {
 		panic(err)
 	}
 
-	// Encode float data added by keystream to plaintext coefficients
+	// Encode float data added by key stream to plaintext coefficients
 	fvEvaluator = ckks_fv.NewMFVEvaluator(params, ckks_fv.EvaluationKey{Rlk: rlk, Rtks: rotkeys}, pDcds)
 	coeffs := make([][]float64, 16)
 	for s := 0; s < 16; s++ {
 		coeffs[s] = make([]float64, params.N())
 	}
 
+	// Key generation
 	key = make([]uint64, 16)
 	for i := 0; i < 16; i++ {
 		key[i] = uint64(i + 1) // Use (1, ..., 16) for testing
 	}
 
-	if fullCoeffs {
+	if fullCOEFF {
+		// Data generation
 		data = make([][]float64, 16)
 		for s := 0; s < 16; s++ {
 			data[s] = make([]float64, params.N())
-			for i := 0; i < params.N(); i++ {
+			for i := 0; i < dataSize; i++ {
 				data[s][i] = utils.RandFloat64(-1, 1)
 			}
 		}
 
+		// Nonce generation
 		nonces = make([][]byte, params.N())
-		for i := 0; i < params.N(); i++ {
+		for i := 0; i < dataSize; i++ {
 			nonces[i] = make([]byte, 64)
 			rand.Read(nonces[i])
 		}
 
+		// Key stream generation
 		keystream = make([][]uint64, params.N())
-		for i := 0; i < params.N(); i++ {
+		for i := 0; i < dataSize; i++ {
 			keystream[i] = plainHera(numRound, nonces[i], key, params.PlainModulus())
 		}
 
+		// data to coefficients
 		for s := 0; s < 16; s++ {
-			for i := 0; i < params.N()/2; i++ {
+			for i := 0; i < dataSize/2; i++ {
 				j := utils.BitReverse64(uint64(i), uint64(params.LogN()-1))
 				coeffs[s][j] = data[s][i]
-				coeffs[s][j+uint64(params.N()/2)] = data[s][i+params.N()/2]
+				coeffs[s][j+uint64(dataSize/2)] = data[s][i+dataSize/2]
 			}
 		}
 
+		// Encode data
 		plainCKKSRingTs = make([]*ckks_fv.PlaintextRingT, 16)
 		for s := 0; s < 16; s++ {
 			plainCKKSRingTs[s] = ckksEncoder.EncodeCoeffsRingTNew(coeffs[s], messageScaling)
 			poly := plainCKKSRingTs[s].Value()[0]
-			for i := 0; i < params.N(); i++ {
+			for i := 0; i < dataSize; i++ {
 				j := utils.BitReverse64(uint64(i), uint64(params.LogN()))
 				poly.Coeffs[0][j] = (poly.Coeffs[0][j] + keystream[i][s]) % params.PlainModulus()
 			}
 		}
 	} else {
+		// Data generation
 		data = make([][]float64, 16)
 		for s := 0; s < 16; s++ {
 			data[s] = make([]float64, params.Slots())
@@ -166,25 +170,29 @@ func TestHera(t *testing.T) {
 			}
 		}
 
+		// Nonce generation
 		nonces = make([][]byte, params.Slots())
 		for i := 0; i < params.Slots(); i++ {
 			nonces[i] = make([]byte, 64)
 			rand.Read(nonces[i])
 		}
 
+		// Key stream generation
 		keystream = make([][]uint64, params.Slots())
 		for i := 0; i < params.Slots(); i++ {
 			keystream[i] = plainHera(numRound, nonces[i], key, params.PlainModulus())
 		}
 
+		// data to coefficients
 		for s := 0; s < 16; s++ {
 			for i := 0; i < params.Slots()/2; i++ {
 				j := utils.BitReverse64(uint64(i), uint64(params.LogN()-1))
 				coeffs[s][j] = data[s][i]
-				coeffs[s][j+uint64(params.N()/2)] = data[s][i+params.Slots()/2]
+				coeffs[s][j+uint64(dataSize/2)] = data[s][i+params.Slots()/2]
 			}
 		}
 
+		// Encode data
 		plainCKKSRingTs = make([]*ckks_fv.PlaintextRingT, 16)
 		for s := 0; s < 16; s++ {
 			plainCKKSRingTs[s] = ckksEncoder.EncodeCoeffsRingTNew(coeffs[s], messageScaling)
@@ -194,7 +202,6 @@ func TestHera(t *testing.T) {
 				poly.Coeffs[0][j] = (poly.Coeffs[0][j] + keystream[i][s]) % params.PlainModulus()
 			}
 		}
-
 	}
 
 	plaintexts = make([]*ckks_fv.Plaintext, 16)
@@ -207,9 +214,8 @@ func TestHera(t *testing.T) {
 	hera = ckks_fv.NewMFVHera(numRound, params, fvEncoder, fvEncryptor, fvEvaluator, heraModDown[0])
 	kCt := hera.EncKey(key)
 
-	// FV Keystream
-	benchOffLat := fmt.Sprintf("RtF HERA Offline Latency")
-	b.Run(benchOffLat, func(b *testing.B) {
+	// FV Key stream
+	t.Run("Offline", func(t *testing.T) {
 		fvKeystreams = hera.Crypt(nonces, kCt, heraModDown)
 		for i := 0; i < 1; i++ {
 			fvKeystreams[i] = fvEvaluator.SlotsToCoeffs(fvKeystreams[i], stcModDown)
@@ -217,8 +223,7 @@ func TestHera(t *testing.T) {
 		}
 	})
 	/* We assume that b.N == 1 */
-	benchOffThrput := fmt.Sprintf("RtF HERA Offline Throughput")
-	t.Run(benchOffThrput, func(b *testing.B) {
+	t.Run("Offline", func(t *testing.T) {
 		for i := 1; i < 16; i++ {
 			fvKeystreams[i] = fvEvaluator.SlotsToCoeffs(fvKeystreams[i], stcModDown)
 			fvEvaluator.ModSwitchMany(fvKeystreams[i], fvKeystreams[i], fvKeystreams[i].Level())
@@ -227,7 +232,7 @@ func TestHera(t *testing.T) {
 
 	var ctBoot *ckks_fv.Ciphertext
 	benchOnline := fmt.Sprintf("RtF HERA Online Lat x1")
-	t.Run(benchOnline, func(b *testing.B) {
+	t.Run(benchOnline, func(t *testing.T) {
 		// Encrypt and mod switch to the lowest level
 		ciphertext := ckks_fv.NewCiphertextFVLvl(params, 1, 0)
 		ciphertext.Value()[0] = plaintexts[0].Value()[0].CopyNew()
@@ -235,7 +240,7 @@ func TestHera(t *testing.T) {
 		fvEvaluator.TransformToNTT(ciphertext, ciphertext)
 		ciphertext.SetScale(math.Exp2(math.Round(math.Log2(float64(params.Qi()[0]) / float64(params.PlainModulus()) * messageScaling))))
 
-		if fullCoeffs {
+		if fullCOEFF {
 			ctBoot, _ = hbtp.HalfBoot(ciphertext, false)
 		} else {
 			ctBoot, _ = hbtp.HalfBoot(ciphertext, true)
