@@ -10,6 +10,7 @@ import (
 type Encryptor interface {
 	Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext
 	Decrypt(ciphertext HHESoK.Ciphertext) HHESoK.Plaintext
+	KeyStream(size int) HHESoK.Matrix
 }
 
 type encryptor struct {
@@ -78,4 +79,29 @@ func (enc encryptor) Decrypt(ciphertext HHESoK.Ciphertext) HHESoK.Plaintext {
 	logger := HHESoK.NewLogger(HHESoK.DEBUG)
 	logger.PrintDataLen(plaintext)
 	return plaintext
+}
+
+// KeyStream takes len(plaintext) as input and generate a keyStream
+func (enc encryptor) KeyStream(size int) (keyStream HHESoK.Matrix) {
+	blockSize := enc.her.params.GetBlockSize()
+	numBlock := int(math.Ceil(float64(size / blockSize)))
+	if HHESoK.DEBUG {
+		fmt.Printf("=== Number of Block: %d\n", numBlock)
+	}
+	// Nonce and Counter
+	nonces := make([][]byte, blockSize)
+	// set nonce up to blockSize
+	n := 123456789
+	for i := 0; i < blockSize; i++ {
+		nonces[i] = make([]byte, 8)
+		binary.BigEndian.PutUint64(nonces[i], uint64(i+n))
+	}
+	// Key stream generation
+	keyStream = make(HHESoK.Matrix, numBlock)
+	for i := 0; i < numBlock; i++ {
+		copy(keyStream[i], enc.her.keyStream(nonces[i]))
+	}
+	logger := HHESoK.NewLogger(HHESoK.DEBUG)
+	logger.PrintDataLen(keyStream[0])
+	return
 }
