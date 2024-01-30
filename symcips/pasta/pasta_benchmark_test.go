@@ -19,7 +19,7 @@ func BenchmarkPasta4(b *testing.B) {
 }
 
 func benchmarkPasta(tc *TestContext, b *testing.B) {
-	fmt.Println(testString("Pasta", tc.params))
+	fmt.Println(testString("Pasta", tc.Params))
 	if testing.Short() {
 		b.Skip("skipping benchmark in short mode.")
 	}
@@ -29,7 +29,7 @@ func benchmarkPasta(tc *TestContext, b *testing.B) {
 	var newCiphertext HHESoK.Ciphertext
 	b.Run("Pasta/NewPasta", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			pastaCipher = NewPasta(tc.key, tc.params)
+			pastaCipher = NewPasta(tc.Key, tc.Params)
 		}
 	})
 
@@ -41,7 +41,7 @@ func benchmarkPasta(tc *TestContext, b *testing.B) {
 
 	b.Run("Pasta/Encrypt", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			newCiphertext = encryptor.Encrypt(tc.plaintext)
+			newCiphertext = encryptor.Encrypt(tc.Plaintext)
 		}
 	})
 

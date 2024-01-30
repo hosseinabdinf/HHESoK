@@ -13,7 +13,7 @@ func BenchmarkRubato(b *testing.B) {
 }
 
 func benchmarkRubato(tc *TestContext, b *testing.B) {
-	fmt.Println(testString("Rubato", tc.params))
+	fmt.Println(testString("Rubato", tc.Params))
 	if testing.Short() {
 		b.Skip("skipping benchmark in short mode.")
 	}
@@ -24,7 +24,7 @@ func benchmarkRubato(tc *TestContext, b *testing.B) {
 
 	b.Run("Rubato/NewRubato", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rubatoCipher = NewRubato(tc.key, tc.params)
+			rubatoCipher = NewRubato(tc.Key, tc.Params)
 		}
 	})
 
@@ -36,7 +36,7 @@ func benchmarkRubato(tc *TestContext, b *testing.B) {
 
 	b.Run("Rubato/Encrypt", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			newCiphertext = encryptor.Encrypt(tc.plaintext)
+			newCiphertext = encryptor.Encrypt(tc.Plaintext)
 		}
 	})
 

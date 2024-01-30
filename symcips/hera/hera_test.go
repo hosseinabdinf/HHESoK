@@ -14,20 +14,20 @@ func testString(opName string, p Parameter) string {
 func TestHera(t *testing.T) {
 	logger := HHESoK.NewLogger(HHESoK.DEBUG)
 	for _, tc := range TestVector {
-		fmt.Println(testString("HERA", tc.params))
-		heraCipher := NewHera(tc.key, tc.params)
+		fmt.Println(testString("HERA", tc.Params))
+		heraCipher := NewHera(tc.Key, tc.Params)
 		encryptor := heraCipher.NewEncryptor()
 		var ciphertext HHESoK.Ciphertext
 
 		t.Run("HeraEncryptionTest", func(t *testing.T) {
-			ciphertext = encryptor.Encrypt(tc.plaintext)
+			ciphertext = encryptor.Encrypt(tc.Plaintext)
 		})
 
 		t.Run("HeraDecryptionTest", func(t *testing.T) {
 			encryptor.Decrypt(ciphertext)
 		})
 
-		logger.PrintDataLen(tc.key)
+		logger.PrintDataLen(tc.Key)
 		logger.PrintDataLen(ciphertext)
 	}
 }

@@ -13,29 +13,29 @@ const (
 )
 
 type TestContext struct {
-	tc         TestCase
-	params     Parameter
-	key        HHESoK.Key
-	plaintext  HHESoK.Plaintext
-	ciphertext HHESoK.Ciphertext
+	Tc         TestCase
+	Params     Parameter
+	Key        HHESoK.Key
+	Plaintext  HHESoK.Plaintext
+	Ciphertext HHESoK.Ciphertext
 }
 
 // Test Vectors
 var testVector = []TestContext{
 	{
-		tc: ENC,
-		params: Parameter{
+		Tc: ENC,
+		Params: Parameter{
 			BlockSize: ckks_fv.RubatoParams[ckks_fv.RUBATO128S].Blocksize,
 			Modulus:   ckks_fv.RubatoParams[ckks_fv.RUBATO128S].PlainModulus,
 			Rounds:    ckks_fv.RubatoParams[ckks_fv.RUBATO128S].NumRound,
 			Sigma:     ckks_fv.RubatoParams[ckks_fv.RUBATO128S].Sigma,
 		},
-		key: HHESoK.Key{
+		Key: HHESoK.Key{
 			0x2b5ec16, 0x233b07d, 0x31e09fd, 0x36de34e,
 			0xe16271, 0x2aae283, 0x38eeaea, 0x5dfe6,
 			0x199e90d, 0x17b8a31, 0xce905a, 0x351ae8a,
 			0x2b87acf, 0x24f62ae, 0x1670737, 0x3394909},
-		plaintext: HHESoK.Plaintext{
+		Plaintext: HHESoK.Plaintext{
 			0x3a9c825, 0xb8622f, 0x3665988, 0x3dcbdeb,
 			0x874b98, 0x3595983, 0x26880fe, 0x2a5bc62,
 			0x15a362e, 0x20d7964, 0x23114e8, 0x1ec0a28,
@@ -68,17 +68,17 @@ var testVector = []TestContext{
 			0xb525db, 0x24ac302, 0x35ca6e, 0x15b3410,
 			0xf4a0e5, 0x356aef9, 0x1349fbf, 0x1d50682,
 			0x3da7a4c, 0x2c05730, 0x123da66, 0x202667},
-		ciphertext: HHESoK.Ciphertext{},
+		Ciphertext: HHESoK.Ciphertext{},
 	},
 	{
-		tc: ENC,
-		params: Parameter{
+		Tc: ENC,
+		Params: Parameter{
 			BlockSize: ckks_fv.RubatoParams[ckks_fv.RUBATO128M].Blocksize,
 			Modulus:   ckks_fv.RubatoParams[ckks_fv.RUBATO128M].PlainModulus,
 			Rounds:    ckks_fv.RubatoParams[ckks_fv.RUBATO128M].NumRound,
 			Sigma:     ckks_fv.RubatoParams[ckks_fv.RUBATO128M].Sigma,
 		},
-		key: HHESoK.Key{
+		Key: HHESoK.Key{
 			0x12f820e, 0x806b8a, 0xaa0aff, 0x1b50b33,
 			0x35bae, 0x1e379da, 0xf2db0c, 0x1f7f9b3,
 			0x713e2f, 0x169a3bb, 0x1d5c556, 0x10c689,
@@ -88,7 +88,7 @@ var testVector = []TestContext{
 			0xebac3a, 0x118f832, 0x1bb5971, 0x323963,
 			0xb8d4f4, 0xfed2f1, 0x280b8, 0xdbb08,
 			0xe78d81, 0x2154c7, 0x9fdbfe, 0x1633700},
-		plaintext: HHESoK.Plaintext{
+		Plaintext: HHESoK.Plaintext{
 			0x1ce923d, 0xab3223, 0x606079, 0x1ccab3b,
 			0x163984c, 0x65533e, 0x984b6b, 0xda71b7,
 			0x78ce7, 0x1992620, 0x17a5158, 0x16508c0,
@@ -121,17 +121,17 @@ var testVector = []TestContext{
 			0x1c12112, 0xfc8986, 0xefb034, 0x1321d1c,
 			0xc472e8, 0x15b2b50, 0x1c07b47, 0x12949e0,
 			0x1e849c0, 0x99691c, 0x1449b47, 0x3ff05e},
-		ciphertext: HHESoK.Ciphertext{},
+		Ciphertext: HHESoK.Ciphertext{},
 	},
 	{
-		tc: ENC,
-		params: Parameter{
+		Tc: ENC,
+		Params: Parameter{
 			BlockSize: ckks_fv.RubatoParams[ckks_fv.RUBATO128L].Blocksize,
 			Modulus:   ckks_fv.RubatoParams[ckks_fv.RUBATO128L].PlainModulus,
 			Rounds:    ckks_fv.RubatoParams[ckks_fv.RUBATO128L].NumRound,
 			Sigma:     ckks_fv.RubatoParams[ckks_fv.RUBATO128L].Sigma,
 		},
-		key: HHESoK.Key{
+		Key: HHESoK.Key{
 			0x133d8ba, 0xb78d11, 0x4d5ffa, 0x5a6ebf,
 			0xe15403, 0xfbc477, 0x66a332, 0x1ca7010,
 			0xe9511a, 0x1919e36, 0x1522769, 0xa9a100,
@@ -148,7 +148,7 @@ var testVector = []TestContext{
 			0x1235b42, 0xd79f97, 0x2b0c, 0x19793f,
 			0x1e06121, 0xd2ed6e, 0x51e5eb, 0x759229,
 			0x17ba838, 0x60ae47, 0x103a910, 0x4012f4},
-		plaintext: HHESoK.Plaintext{
+		Plaintext: HHESoK.Plaintext{
 			0x1664aae, 0x514795, 0x1daaf9a, 0x987a2f,
 			0x25f85a, 0x953159, 0x1609fe9, 0x156711a,
 			0x52d375, 0x1b56231, 0x6d927a, 0x6da78c,
@@ -181,6 +181,6 @@ var testVector = []TestContext{
 			0x156e7f3, 0x12e0003, 0xdae854, 0x7d9b05,
 			0x1f68389, 0x8642bf, 0x84c6e3, 0xf2c1e2,
 			0x5b64ec, 0x410cc0, 0x193e7e6, 0xd6ff76},
-		ciphertext: HHESoK.Ciphertext{},
+		Ciphertext: HHESoK.Ciphertext{},
 	},
 }

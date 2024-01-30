@@ -15,28 +15,28 @@ func testString(opName string, p Parameter) string {
 func TestPasta3(t *testing.T) {
 	logger := HHESoK.NewLogger(HHESoK.DEBUG)
 	for _, tc := range pasta3TestVector {
-		pastaCipher := NewPasta(tc.key, tc.params)
+		pastaCipher := NewPasta(tc.Key, tc.Params)
 		encryptor := pastaCipher.NewEncryptor()
 		var ciphertext HHESoK.Ciphertext
 
 		t.Run("PastaEncryptionTest", func(t *testing.T) {
-			ciphertext = encryptor.Encrypt(tc.plaintext)
+			ciphertext = encryptor.Encrypt(tc.Plaintext)
 		})
 
 		t.Run("PastaDecryptionTest", func(t *testing.T) {
 			encryptor.Decrypt(ciphertext)
 		})
 
-		t.Run(testString("Pasta", tc.params), func(t *testing.T) {
-			newCiphertext := encryptor.Encrypt(tc.plaintext)
+		t.Run(testString("Pasta", tc.Params), func(t *testing.T) {
+			newCiphertext := encryptor.Encrypt(tc.Plaintext)
 			newPlaintext := encryptor.Decrypt(newCiphertext)
 
-			if reflect.DeepEqual(tc.plaintext, newPlaintext) {
+			if reflect.DeepEqual(tc.Plaintext, newPlaintext) {
 				logger.PrintMessage("Got the same plaintext, it is working fine.")
 			} else {
 				logger.PrintMessage("The plaintext after DEC is different, decryption failure!")
 			}
-			if reflect.DeepEqual(tc.expCipherText, newCiphertext) {
+			if reflect.DeepEqual(tc.ExpCipherText, newCiphertext) {
 				logger.PrintMessage("Got the same ciphertext, it is working fine.")
 			} else {
 				logger.PrintMessage("The ciphertext after ENC is different, encryption failure!")
@@ -48,28 +48,28 @@ func TestPasta3(t *testing.T) {
 func TestPasta4(t *testing.T) {
 	logger := HHESoK.NewLogger(HHESoK.DEBUG)
 	for _, tc := range pasta4TestVector {
-		pastaCipher := NewPasta(tc.key, tc.params)
+		pastaCipher := NewPasta(tc.Key, tc.Params)
 		encryptor := pastaCipher.NewEncryptor()
 		var ciphertext HHESoK.Ciphertext
 
 		t.Run("PastaEncryptionTest", func(t *testing.T) {
-			ciphertext = encryptor.Encrypt(tc.plaintext)
+			ciphertext = encryptor.Encrypt(tc.Plaintext)
 		})
 
 		t.Run("PastaDecryptionTest", func(t *testing.T) {
 			encryptor.Decrypt(ciphertext)
 		})
 
-		t.Run(testString("Pasta", tc.params), func(t *testing.T) {
-			newCiphertext := encryptor.Encrypt(tc.plaintext)
+		t.Run(testString("Pasta", tc.Params), func(t *testing.T) {
+			newCiphertext := encryptor.Encrypt(tc.Plaintext)
 			newPlaintext := encryptor.Decrypt(newCiphertext)
 
-			if reflect.DeepEqual(tc.plaintext, newPlaintext) {
+			if reflect.DeepEqual(tc.Plaintext, newPlaintext) {
 				logger.PrintMessage("Got the same plaintext, it is working fine.")
 			} else {
 				logger.PrintMessage("The plaintext after DEC is different, decryption failure!")
 			}
-			if reflect.DeepEqual(tc.expCipherText, newCiphertext) {
+			if reflect.DeepEqual(tc.ExpCipherText, newCiphertext) {
 				logger.PrintMessage("Got the same ciphertext, it is working fine.")
 			} else {
 				logger.PrintMessage("The ciphertext after ENC is different, encryption failure!")

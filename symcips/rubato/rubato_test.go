@@ -14,20 +14,20 @@ func testString(opName string, p Parameter) string {
 func TestRubato(t *testing.T) {
 	logger := HHESoK.NewLogger(HHESoK.DEBUG)
 	for _, tc := range testVector {
-		fmt.Println(testString("Rubato", tc.params))
-		rubatoCipher := NewRubato(tc.key, tc.params)
+		fmt.Println(testString("Rubato", tc.Params))
+		rubatoCipher := NewRubato(tc.Key, tc.Params)
 		encryptor := rubatoCipher.NewEncryptor()
 		var ciphertext HHESoK.Ciphertext
 
 		t.Run("RubatoEncryptionTest", func(t *testing.T) {
-			ciphertext = encryptor.Encrypt(tc.plaintext)
+			ciphertext = encryptor.Encrypt(tc.Plaintext)
 		})
 
 		t.Run("RubatoDecryptionTest", func(t *testing.T) {
 			encryptor.Decrypt(ciphertext)
 		})
 
-		logger.PrintDataLen(tc.key)
+		logger.PrintDataLen(tc.Key)
 		logger.PrintDataLen(ciphertext)
 	}
 }

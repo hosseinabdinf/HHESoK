@@ -1,15 +1,17 @@
 package hera
 
 import (
+	"HHESoK"
 	"HHESoK/ckks_integration/ckks_fv"
 	"HHESoK/ckks_integration/utils"
+	SymHera "HHESoK/symcips/hera"
 	"crypto/rand"
 	"fmt"
 	"math"
 	"testing"
 )
 
-func testString(opName string, p Parameter) string {
+func testString(opName string, p SymHera.Parameter) string {
 	return fmt.Sprintf("%s/BlockSize=%d/Modulus=%d/Rounds=%d",
 		opName, p.GetBlockSize(), p.GetModulus(), p.GetRounds())
 }
@@ -27,6 +29,27 @@ func printDebug(params *ckks_fv.Parameters, ciphertext *ckks_fv.Ciphertext, valu
 }
 
 func TestHera(t *testing.T) {
+	logger := HHESoK.NewLogger(HHESoK.DEBUG)
+	for _, tc := range SymHera.TestVector {
+		fmt.Println(testString("HERA", tc.Params))
+		heraCipher := SymHera.NewHera(tc.Key, tc.Params)
+		encryptor := heraCipher.NewEncryptor()
+		var ciphertext HHESoK.Ciphertext
+
+		t.Run("HeraEncryptionTest", func(t *testing.T) {
+			ciphertext = encryptor.Encrypt(tc.Plaintext)
+		})
+
+		t.Run("HeraDecryptionTest", func(t *testing.T) {
+			encryptor.Decrypt(ciphertext)
+		})
+
+		logger.PrintDataLen(tc.Key)
+		logger.PrintDataLen(ciphertext)
+	}
+}
+
+func testHera(t *testing.T) {
 	//logger := symcips.NewLogger(symcips.DEBUG)
 	numRound := 5
 	paramIndex := 1
@@ -138,7 +161,7 @@ func TestHera(t *testing.T) {
 		// Key stream generation
 		keystream = make([][]uint64, params.N())
 		for i := 0; i < dataSize; i++ {
-			keystream[i] = plainHera(numRound, nonces[i], key, params.PlainModulus())
+			//keystream[i] = plainHera(numRound, nonces[i], key, params.PlainModulus())
 		}
 
 		// data to coefficients
@@ -180,7 +203,7 @@ func TestHera(t *testing.T) {
 		// Key stream generation
 		keystream = make([][]uint64, params.Slots())
 		for i := 0; i < params.Slots(); i++ {
-			keystream[i] = plainHera(numRound, nonces[i], key, params.PlainModulus())
+			//keystream[i] = plainHera(numRound, nonces[i], key, params.PlainModulus())
 		}
 
 		// data to coefficients
