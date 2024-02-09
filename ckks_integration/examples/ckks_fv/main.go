@@ -943,8 +943,8 @@ func findRubatoModDown(rubatoParam int, radix int) {
 }
 
 func main() {
-	// findHeraModDown(4, 0, 2, false)
-	testPlainRubato(ckks_fv.RUBATO80L)
+	findHeraModDown(4, 0, 2, false)
+	//testPlainRubato(ckks_fv.RUBATO80L)
 	// testFVRubato(ckks_fv.RUBATO80L)
 	// findRubatoModDown(ckks_fv.RUBATO80S, 2)
 }
