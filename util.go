@@ -197,3 +197,25 @@ func RandomFloatDataGen(col int, row int) (data [][]float64) {
 //	fmt.Println("Len: ", len(plaintext), " - OG: ", data[0])
 //	symcips.Uint64ToHex(plaintext)
 //fmt.Println(">  Encrypt() the data[", s, "]")
+
+// RotateSlice to rotate a slice by a given offset
+func RotateSlice(slice Block, offset uint64) {
+	l := len(slice)
+	if l == 0 {
+		return
+	}
+
+	// Normalize offset to be within the slice's length
+	offset %= uint64(l)
+	// Rotate the slice elements
+	Reverse(slice[:offset])
+	Reverse(slice[offset:])
+	Reverse(slice)
+}
+
+// Reverse to reverse a slice
+func Reverse(slice Block) {
+	for i, j := 0, len(slice)-1; i < j; i, j = i+1, j-1 {
+		slice[i], slice[j] = slice[j], slice[i]
+	}
+}

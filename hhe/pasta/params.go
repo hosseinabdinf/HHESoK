@@ -8,12 +8,6 @@ import (
 	"github.com/tuneinsight/lattigo/v5/schemes/bfv"
 )
 
-type Parameter struct {
-	KeySize    int
-	PlainSize  int
-	CipherSize int
-}
-
 var HEIntParamsN12QP109 = heint.ParametersLiteral{
 	LogN:             12,
 	LogQ:             []int{39, 31},
@@ -21,7 +15,7 @@ var HEIntParamsN12QP109 = heint.ParametersLiteral{
 	PlaintextModulus: 0x10001,
 }
 
-type HEParameter struct {
+type Parameter struct {
 	secretKey          HHESoK.Key
 	params             pasta.Parameter
 	plainMod           uint64
@@ -35,16 +29,16 @@ type HEParameter struct {
 	//heGK               GaloisKey
 }
 
-func (params Parameter) getKeySize() int {
-	return params.KeySize
+func (params Parameter) GetKeySize() int {
+	return params.params.GetKeySize()
 }
 
-func (params Parameter) getPlainSize() int {
-	return params.PlainSize
+func (params Parameter) GetPlainSize() int {
+	return params.params.GetPlainSize()
 }
 
-func (params Parameter) getCipherSize() int {
-	return params.CipherSize
+func (params Parameter) GetCipherSize() int {
+	return params.params.GetCipherSize()
 }
 
 func (params Parameter) NewParameters() {
