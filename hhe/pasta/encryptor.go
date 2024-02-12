@@ -5,6 +5,7 @@ import (
 	"HHESoK/symcips/pasta"
 	"github.com/tuneinsight/lattigo/v5/core/rlwe"
 	"github.com/tuneinsight/lattigo/v5/schemes/bfv"
+	"math"
 )
 
 type Encryptor interface {
@@ -65,10 +66,55 @@ func (enc encryptor) EncryptSymKey(batchEncoder bool) (key *rlwe.Ciphertext) {
 }
 
 // Trancipher convert the symmetrically encrypted ciphertext into homomorphically encrypted cipher
-func (enc encryptor) Trancipher(ciphertext HHESoK.Ciphertext, batchEncoder bool) (res []*rlwe.Ciphertext) {
+func (enc encryptor) Trancipher(key *rlwe.Ciphertext, ciphertext HHESoK.Ciphertext, batchEncoder bool) (res []*rlwe.Ciphertext) {
+	logger := HHESoK.NewLogger(HHESoK.DEBUG)
 	bsgs := enc.hepa.bSgS
-	symPasta := pasta.NewPasta()
-	return nil
+
+	nonce := uint64(123456789)
+	size := len(ciphertext)
+	numBlock := uint64(math.Ceil(float64(size / enc.hepa.params.GetCipherSize())))
+
+	symPasta := pasta.NewPasta(enc.hepa.params.secretKey, enc.hepa.params.params)
+	res = make([]*rlwe.Ciphertext, numBlock)
+
+	for b := uint64(0); b < numBlock; b++ {
+		symPasta.InitShake(nonce, b)
+		state := key.CopyNew()
+		R := enc.hepa.params.params.GetRounds()
+		for r := 1; r <= R; r++ {
+			logger.PrintMessages(">>> Round: ", r, " <<<")
+			mat1 := symPasta.GetRandomMatrix()
+			mat2 := symPasta.GetRandomMatrix()
+			rc := symPasta.GetRcVector(int(enc.hepa.halfSlots))
+
+			state = enc.hepa.matMul(state, mat1, mat2)
+			state = enc.hepa.addRC(state, rc)
+			state = enc.hepa.mix(state)
+
+			if r == R {
+				state = enc.hepa.sBoxCube(state)
+			} else {
+				state = enc.hepa.sBoxFeistel(state)
+			}
+			//	print noise for state in each round
+		}
+		//	final addition
+		mat1 := symPasta.GetRandomMatrix()
+		mat2 := symPasta.GetRandomMatrix()
+		rc := symPasta.GetRcVector(int(enc.hepa.halfSlots))
+
+		state = enc.hepa.matMul(state, mat1, mat2)
+		state = enc.hepa.addRC(state, rc)
+		state = enc.hepa.mix(state)
+		var sIndex = int(b) * enc.hepa.params.GetCipherSize()
+		var eIndex = int(math.Min(float64((int(b)+1)*enc.hepa.params.GetCipherSize()), float64(size)))
+		tempCipher := ciphertext[sIndex:eIndex]
+		plaintext := bfv.NewPlaintext(enc.hepa.bfvParams, enc.hepa.bfvParams.MaxLevel())
+		_ = enc.hepa.encoder.Encode(tempCipher, plaintext)
+		//todo: state = enc.hepa.evaluator.NegNEw()
+
+	}
+	return
 }
 
 // Decrypt homomorphic ciphertext

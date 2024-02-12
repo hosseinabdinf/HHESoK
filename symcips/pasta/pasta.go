@@ -9,6 +9,9 @@ import (
 
 type Pasta interface {
 	NewEncryptor() Encryptor
+	InitShake(nonce uint64, counter uint64)
+	GetRcVector(size int) HHESoK.Block
+	GetRandomMatrix() HHESoK.Matrix
 }
 
 type pasta struct {
@@ -71,15 +74,15 @@ func (pas *pasta) preProcess(nonce uint64, counter uint64) {
 	// todo: check this one!! need to be fixed
 	// todo: for now we are not using it!
 	numRounds := pas.params.GetRounds()
-	pas.initShake(nonce, counter)
+	pas.InitShake(nonce, counter)
 	mats1 := make(HHESoK.Vector3D, numRounds+1)
 	mats2 := make(HHESoK.Vector3D, numRounds+1)
 	rcs1 := make(HHESoK.Matrix, numRounds+1)
 	rcs2 := make(HHESoK.Matrix, numRounds+1)
 
 	for r := 0; r <= numRounds; r++ {
-		mats1[r] = pas.getRandomMatrix()
-		mats2[r] = pas.getRandomMatrix()
+		mats1[r] = pas.GetRandomMatrix()
+		mats2[r] = pas.GetRandomMatrix()
 		rcs1[r] = pas.getRandomVector(true)
 		rcs2[r] = pas.getRandomVector(true)
 	}
@@ -87,7 +90,7 @@ func (pas *pasta) preProcess(nonce uint64, counter uint64) {
 
 // GenKeyStream generate pasta secretKey stream based on nonce and counter
 func (pas *pasta) keyStream(nonce uint64, counter uint64) HHESoK.Block {
-	pas.initShake(nonce, counter)
+	pas.InitShake(nonce, counter)
 	ps := pas.params.GetPlainSize()
 
 	// copy half of the secretKey to state1 and the other half to state2
@@ -254,8 +257,8 @@ func (pas *pasta) mix() {
 	}
 }
 
-// initShake function get nonce and counter and combine them as seed for SHAKE128
-func (pas *pasta) initShake(nonce uint64, counter uint64) {
+// InitShake function get nonce and counter and combine them as seed for SHAKE128
+func (pas *pasta) InitShake(nonce uint64, counter uint64) {
 	seed := make([]byte, 16)
 
 	binary.BigEndian.PutUint64(seed[:8], nonce)
@@ -308,8 +311,8 @@ func (pas *pasta) getRandomVector(allowZero bool) HHESoK.Block {
 [	r1	r2	r3	...	rt	]
 */
 
-// getRandomMatrix generate a random invertible matrix
-func (pas *pasta) getRandomMatrix() HHESoK.Matrix {
+// GetRandomMatrix generate a random invertible matrix
+func (pas *pasta) GetRandomMatrix() HHESoK.Matrix {
 	ps := pas.params.GetPlainSize()
 	mat := make(HHESoK.Matrix, ps) // mat[ps][ps]
 	for i := range mat {
@@ -322,8 +325,8 @@ func (pas *pasta) getRandomMatrix() HHESoK.Matrix {
 	return mat
 }
 
-// getRcVector return a vector of random elements, the vector size will be (size+plainSize)
-func (pas *pasta) getRcVector(size int) HHESoK.Block {
+// GetRcVector return a vector of random elements, the vector size will be (size+plainSize)
+func (pas *pasta) GetRcVector(size int) HHESoK.Block {
 	ps := pas.params.GetPlainSize()
 	rc := make(HHESoK.Block, size+ps)
 	for i := 0; i < ps; i++ {

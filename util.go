@@ -32,6 +32,7 @@ func NewLogger(debug bool) Logger {
 
 type Logger interface {
 	PrintMessage(message string)
+	PrintMessages(messages ...interface{})
 	PrintDataLen(data []uint64)
 }
 
@@ -41,6 +42,14 @@ func (l logger) PrintMessage(message string) {
 	}
 }
 
+func (l logger) PrintMessages(messages ...interface{}) {
+	if l.debug {
+		for _, message := range messages {
+			fmt.Print(message)
+		}
+		fmt.Println()
+	}
+}
 func (l logger) PrintDataLen(data []uint64) {
 	if l.debug {
 		fmt.Printf("Len: %d, Data: %d \n", len(data), data)
