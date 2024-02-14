@@ -7,7 +7,7 @@ import (
 )
 
 func BenchmarkRubato(b *testing.B) {
-	for _, tc := range testVector {
+	for _, tc := range TestsVector {
 		benchmarkRubato(&tc, b)
 	}
 }

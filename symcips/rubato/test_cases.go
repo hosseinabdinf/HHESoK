@@ -21,7 +21,7 @@ type TestContext struct {
 }
 
 // Test Vectors
-var testVector = []TestContext{
+var TestsVector = []TestContext{
 	{
 		Tc: ENC,
 		Params: Parameter{

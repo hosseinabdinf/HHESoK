@@ -45,8 +45,8 @@ func (rub *rubato) NewEncryptor() Encryptor {
 	return &encryptor{rub: *rub}
 }
 
-// keyStream returns a vector of [BlockSize - 4][uint64] elements as key stream
-func (rub *rubato) keyStream(nonce []byte, counter []byte) (ks HHESoK.Block) {
+// KeyStream returns a vector of [BlockSize - 4][uint64] elements as key stream
+func (rub *rubato) KeyStream(nonce []byte, counter []byte) (ks HHESoK.Block) {
 	p := rub.params.GetModulus()
 	rounds := rub.params.GetRounds()
 	blockSize := rub.params.GetBlockSize()

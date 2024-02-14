@@ -189,7 +189,7 @@ func (hera *mfvHera) modSwitch(nbSwitch int) {
 	}
 }
 
-// Compute ciphertexts without modulus switching
+// CryptNoModSwitch Compute ciphertexts without modulus switching
 func (hera *mfvHera) CryptNoModSwitch(nonce [][]byte, kCt []*Ciphertext) []*Ciphertext {
 	for st := 0; st < 16; st++ {
 		hera.mkCt[st] = kCt[st].CopyNew().Ciphertext()
@@ -209,7 +209,7 @@ func (hera *mfvHera) CryptNoModSwitch(nonce [][]byte, kCt []*Ciphertext) []*Ciph
 	return hera.stCt
 }
 
-// Compute ciphertexts with automatic modulus switching
+// CryptAutoModSwitch Compute ciphertexts with automatic modulus switching
 func (hera *mfvHera) CryptAutoModSwitch(nonce [][]byte, kCt []*Ciphertext, noiseEstimator MFVNoiseEstimator) ([]*Ciphertext, []int) {
 	heraModDown := make([]int, hera.numRound+1)
 	heraModDown[0] = hera.nbInitModDown
@@ -233,7 +233,7 @@ func (hera *mfvHera) CryptAutoModSwitch(nonce [][]byte, kCt []*Ciphertext, noise
 	return hera.stCt, heraModDown
 }
 
-// Compute ciphertexts with modulus switching as given in heraModDown
+// Crypt Compute ciphertexts with modulus switching as given in heraModDown
 func (hera *mfvHera) Crypt(nonce [][]byte, kCt []*Ciphertext, heraModDown []int) []*Ciphertext {
 	if heraModDown[0] != hera.nbInitModDown {
 		errorString := fmt.Sprintf("nbInitModDown expected %d but %d given", hera.nbInitModDown, heraModDown[0])

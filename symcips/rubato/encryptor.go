@@ -42,7 +42,7 @@ func (enc encryptor) Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext {
 		z := make(HHESoK.Block, outputSize)
 		binary.BigEndian.PutUint64(counter, uint64(i+1))
 		// counter mode
-		copy(z, enc.rub.keyStream(nonces[i], counter))
+		copy(z, enc.rub.KeyStream(nonces[i], counter))
 		// encrypt the plaintext
 		ciphertext[i] = (ciphertext[i] + z[i]) % p
 	}
@@ -75,7 +75,7 @@ func (enc encryptor) Decrypt(ciphertext HHESoK.Ciphertext) HHESoK.Plaintext {
 		z := make(HHESoK.Block, outputSize)
 		binary.BigEndian.PutUint64(counter, uint64(i+1))
 		// counter mode
-		copy(z, enc.rub.keyStream(nonces[i], counter))
+		copy(z, enc.rub.KeyStream(nonces[i], counter))
 		// encrypt the plaintext
 		plaintext[i] = (plaintext[i] + z[i]) % p
 	}
