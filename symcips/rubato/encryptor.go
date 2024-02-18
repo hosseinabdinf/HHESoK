@@ -18,7 +18,6 @@ type encryptor struct {
 
 func (enc encryptor) Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext {
 	p := enc.rub.params.GetModulus()
-	blockSize := enc.rub.params.GetBlockSize()
 	outputSize := enc.rub.params.GetBlockSize() - 4
 	size := len(plaintext)
 	numBlock := int(math.Ceil(float64(size / outputSize)))
@@ -26,10 +25,10 @@ func (enc encryptor) Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext {
 		fmt.Printf("=== Number of Block: %d\n", numBlock)
 	}
 	// Nonce and Counter
-	nonces := make([][]byte, blockSize)
+	nonces := make([][]byte, numBlock)
 	// set nonce up to blockSize
 	n := 123456789
-	for i := 0; i < blockSize; i++ {
+	for i := 0; i < numBlock; i++ {
 		nonces[i] = make([]byte, 8)
 		binary.BigEndian.PutUint64(nonces[i], uint64(i+n))
 	}
@@ -51,7 +50,6 @@ func (enc encryptor) Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext {
 
 func (enc encryptor) Decrypt(ciphertext HHESoK.Ciphertext) HHESoK.Plaintext {
 	p := enc.rub.params.GetModulus()
-	blockSize := enc.rub.params.GetBlockSize()
 	outputSize := enc.rub.params.GetBlockSize() - 4
 	size := len(ciphertext)
 	numBlock := int(math.Ceil(float64(size / outputSize)))
@@ -59,10 +57,10 @@ func (enc encryptor) Decrypt(ciphertext HHESoK.Ciphertext) HHESoK.Plaintext {
 		fmt.Printf("=== Number of Block: %d\n", numBlock)
 	}
 	// Nonce and Counter
-	nonces := make([][]byte, blockSize)
+	nonces := make([][]byte, numBlock)
 	// set nonce up to blockSize
 	n := 123456789
-	for i := 0; i < blockSize; i++ {
+	for i := 0; i < numBlock; i++ {
 		nonces[i] = make([]byte, 8)
 		binary.BigEndian.PutUint64(nonces[i], uint64(i+n))
 	}

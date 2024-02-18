@@ -10,6 +10,7 @@ import (
 
 type Rubato interface {
 	NewEncryptor() Encryptor
+	KeyStream(nonce []byte, counter []byte) HHESoK.Block
 }
 
 type rubato struct {

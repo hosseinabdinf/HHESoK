@@ -18,7 +18,7 @@ type Ciphertext []uint64
 type Matrix [][]uint64
 type SBox []uint64
 
-const DEBUG = false
+const DEBUG = true
 
 type logger struct {
 	debug bool
