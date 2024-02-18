@@ -11,7 +11,7 @@ import (
 type Encryptor interface {
 	EncryptSymKey(batchEncoder bool) *rlwe.Ciphertext
 	Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext
-	Trancipher(ciphertext HHESoK.Ciphertext, batchEncoder bool) (res []*rlwe.Ciphertext)
+	TranCipher(ciphertext HHESoK.Ciphertext, batchEncoder bool) (res []*rlwe.Ciphertext)
 	Decrypt(ciphertexts *rlwe.Ciphertext) (res HHESoK.Plaintext)
 }
 
@@ -65,10 +65,10 @@ func (enc encryptor) EncryptSymKey(batchEncoder bool) (key *rlwe.Ciphertext) {
 	return
 }
 
-// Trancipher convert the symmetrically encrypted ciphertext into homomorphically encrypted cipher
-func (enc encryptor) Trancipher(key *rlwe.Ciphertext, ciphertext HHESoK.Ciphertext, batchEncoder bool) (res []*rlwe.Ciphertext) {
+// TranCipher convert the symmetrically encrypted ciphertext into homomorphically encrypted cipher
+func (enc encryptor) TranCipher(key *rlwe.Ciphertext, ciphertext HHESoK.Ciphertext, batchEncoder bool) (res []*rlwe.Ciphertext) {
 	logger := HHESoK.NewLogger(HHESoK.DEBUG)
-	bsgs := enc.hepa.bSgS
+	//bsgs := enc.hepa.bSgS
 
 	nonce := uint64(123456789)
 	size := len(ciphertext)
@@ -111,10 +111,11 @@ func (enc encryptor) Trancipher(key *rlwe.Ciphertext, ciphertext HHESoK.Cipherte
 		tempCipher := ciphertext[sIndex:eIndex]
 		plaintext := bfv.NewPlaintext(enc.hepa.bfvParams, enc.hepa.bfvParams.MaxLevel())
 		_ = enc.hepa.encoder.Encode(tempCipher, plaintext)
-		//todo: state = enc.hepa.evaluator.NegNEw()
-
+		// negate state
+		state, _ = enc.hepa.evaluator.MulNew(state, -1)
+		res[b], _ = enc.hepa.evaluator.AddNew(state, plaintext)
 	}
-	return
+	return res
 }
 
 // Decrypt homomorphic ciphertext
