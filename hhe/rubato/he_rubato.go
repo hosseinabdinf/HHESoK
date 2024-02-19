@@ -1,6 +1,7 @@
 package rubato
 
 import (
+	"HHESoK"
 	ckks "HHESoK/ckks_integration/ckks_fv"
 	"HHESoK/ckks_integration/utils"
 	"HHESoK/symcips/rubato"
@@ -9,6 +10,7 @@ import (
 )
 
 type HERubato struct {
+	logger          HHESoK.Logger
 	paramIndex      int
 	params          *ckks.Parameters
 	symParams       rubato.Parameter
@@ -43,6 +45,7 @@ type HERubato struct {
 
 func NewHERubato() *HERubato {
 	rubato := &HERubato{
+		logger:          HHESoK.NewLogger(HHESoK.DEBUG),
 		paramIndex:      0,
 		params:          nil,
 		symParams:       rubato.Parameter{},
@@ -80,13 +83,13 @@ func (hR *HERubato) InitParams(paramIndex int, symParams rubato.Parameter, plain
 	hR.paramIndex = paramIndex
 	hR.symParams = symParams
 	hR.outSize = symParams.BlockSize - 4
-	//hR.N = int(math.Ceil(float64(plainSize / hR.outSize)))
-	hR.N = hR.params.N()
 	hR.hbtpParams = ckks.RtFRubatoParams[0]
 	hR.params, err = hR.hbtpParams.Params()
 	if err != nil {
 		panic(err)
 	}
+	//hR.N = int(math.Ceil(float64(plainSize / hR.outSize)))
+	hR.N = hR.params.N()
 	hR.params.SetPlainModulus(symParams.GetModulus())
 	hR.params.SetLogFVSlots(hR.params.LogN())
 	hR.messageScaling = float64(hR.params.PlainModulus()) / hR.hbtpParams.MessageRatio
@@ -200,11 +203,13 @@ func (hR *HERubato) InitFvRubato() ckks.MFVRubato {
 
 func (hR *HERubato) EncryptSymKey(key []uint64) {
 	hR.symKeyCt = hR.fvRub.EncKey(key)
+	hR.logger.PrintMessages(">> Symmetric Key Length: ", len(hR.symKeyCt))
 }
 
 func (hR *HERubato) GetFvKeyStreams(nonces [][]byte, counter []byte) []*ckks.Ciphertext {
 	fvKeyStreams := hR.fvRub.Crypt(nonces, counter, hR.symKeyCt, hR.rubatoModDown)
 	for i := 0; i < hR.outSize; i++ {
+		hR.logger.PrintMessages(">> index: ", i)
 		fvKeyStreams[i] = hR.fvEvaluator.SlotsToCoeffs(fvKeyStreams[i], hR.stcModDown)
 		hR.fvEvaluator.ModSwitchMany(fvKeyStreams[i], fvKeyStreams[i], fvKeyStreams[i].Level())
 	}

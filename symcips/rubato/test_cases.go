@@ -13,17 +13,19 @@ const (
 )
 
 type TestContext struct {
-	Tc         TestCase
-	Params     Parameter
-	Key        HHESoK.Key
-	Plaintext  HHESoK.Plaintext
-	Ciphertext HHESoK.Ciphertext
+	Tc           TestCase
+	FVParamIndex int
+	Params       Parameter
+	Key          HHESoK.Key
+	Plaintext    HHESoK.Plaintext
+	Ciphertext   HHESoK.Ciphertext
 }
 
 // Test Vectors
 var TestsVector = []TestContext{
 	{
-		Tc: ENC,
+		Tc:           ENC,
+		FVParamIndex: ckks_fv.RUBATO128S,
 		Params: Parameter{
 			BlockSize: ckks_fv.RubatoParams[ckks_fv.RUBATO128S].Blocksize,
 			Modulus:   ckks_fv.RubatoParams[ckks_fv.RUBATO128S].PlainModulus,
@@ -71,7 +73,8 @@ var TestsVector = []TestContext{
 		Ciphertext: HHESoK.Ciphertext{},
 	},
 	{
-		Tc: ENC,
+		Tc:           ENC,
+		FVParamIndex: ckks_fv.RUBATO128M,
 		Params: Parameter{
 			BlockSize: ckks_fv.RubatoParams[ckks_fv.RUBATO128M].Blocksize,
 			Modulus:   ckks_fv.RubatoParams[ckks_fv.RUBATO128M].PlainModulus,
@@ -124,7 +127,8 @@ var TestsVector = []TestContext{
 		Ciphertext: HHESoK.Ciphertext{},
 	},
 	{
-		Tc: ENC,
+		Tc:           ENC,
+		FVParamIndex: ckks_fv.RUBATO128L,
 		Params: Parameter{
 			BlockSize: ckks_fv.RubatoParams[ckks_fv.RUBATO128L].Blocksize,
 			Modulus:   ckks_fv.RubatoParams[ckks_fv.RUBATO128L].PlainModulus,

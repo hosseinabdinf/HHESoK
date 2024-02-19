@@ -23,12 +23,15 @@ func TestRubato(t *testing.T) {
 		logger.PrintDataLen(tc.Key)
 		testHERubato(t, tc)
 	}
+	//fmt.Println(testString("Rubato", rubato.TestsVector[0].Params))
+	//logger.PrintDataLen(rubato.TestsVector[0].Key)
+	//testHERubato(t, rubato.TestsVector[0])
 }
 
 func testHERubato(t *testing.T, tc rubato.TestContext) {
 	heRubato := NewHERubato()
 
-	heRubato.InitParams(ckks.RUBATO128S, tc.Params, len(tc.Plaintext))
+	heRubato.InitParams(tc.FVParamIndex, tc.Params, len(tc.Plaintext))
 
 	heRubato.HEKeyGen()
 
