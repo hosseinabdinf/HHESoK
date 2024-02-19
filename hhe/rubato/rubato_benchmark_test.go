@@ -54,9 +54,9 @@ func benchHERubato(tc rubato.TestContext, b *testing.B) {
 	// need an array of 8-byte nonce for each block of data
 	nonces := heRubato.NonceGen()
 
-	//todo: need a 8-byte counter
+	// need an 8-byte counter
 	counter := make([]byte, 8)
-	rand.Read(counter)
+	_, _ = rand.Read(counter)
 
 	// generate key stream using plain rubato
 	keyStream := make([][]uint64, heRubato.N)

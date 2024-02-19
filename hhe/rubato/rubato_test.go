@@ -13,7 +13,6 @@ import (
 func testString(opName string, p rubato.Parameter) string {
 	return fmt.Sprintf("%s/BlockSize=%d/Modulus=%d/Rounds=%d/Sigma=%f",
 		opName, p.GetBlockSize(), p.GetModulus(), p.GetRounds(), p.GetSigma())
-	//return "nil"
 }
 
 func TestRubato(t *testing.T) {
@@ -23,9 +22,6 @@ func TestRubato(t *testing.T) {
 		logger.PrintDataLen(tc.Key)
 		testHERubato(t, tc)
 	}
-	//fmt.Println(testString("Rubato", rubato.TestsVector[0].Params))
-	//logger.PrintDataLen(rubato.TestsVector[0].Key)
-	//testHERubato(t, rubato.TestsVector[0])
 }
 
 func testHERubato(t *testing.T, tc rubato.TestContext) {
@@ -43,38 +39,40 @@ func testHERubato(t *testing.T, tc rubato.TestContext) {
 
 	heRubato.InitCoefficients()
 
-	// todo: use the plaintext data from test vector
+	// // use the plaintext data from test vector or generate Random
 	data := heRubato.RandomDataGen()
 
-	// todo: need an array of 8-byte nonces for each data
+	// need an array of 8-byte nonce for each block of data
 	nonces := heRubato.NonceGen()
 
-	//todo: need a 8-byte counter
+	// need an 8-byte counter
 	counter := make([]byte, 8)
-	rand.Read(counter)
+	_, _ = rand.Read(counter)
 
-	// todo: generate keystream using plain rubato
-	keystream := make([][]uint64, heRubato.N)
-	for i := 0; i < heRubato.N; i++ {
+	// generate key stream using plain rubato
+	keyStream := make([][]uint64, heRubato.params.N())
+	for i := 0; i < heRubato.params.N(); i++ {
 		symRub := rubato.NewRubato(tc.Key, tc.Params)
-		keystream[i] = symRub.KeyStream(nonces[i], counter)
+		keyStream[i] = symRub.KeyStream(nonces[i], counter)
 	}
 
 	// data to coefficients
 	heRubato.DataToCoefficients(data)
 
-	heRubato.EncodeEncrypt(keystream)
+	heRubato.EncodeEncrypt(keyStream)
 
 	heRubato.ScaleUp()
 
-	// FV Keystream
+	// FV Key Stream, encrypts symmetric key stream using BFV on the client side
 	_ = heRubato.InitFvRubato()
 	heRubato.EncryptSymKey(tc.Key)
 
+	// get BFV key stream using encrypted symmetric key, nonce, and counter on the server side
 	fvKeyStreams := heRubato.GetFvKeyStreams(nonces, counter)
 
 	heRubato.ScaleCiphertext(fvKeyStreams)
 
+	// half bootstrapping
 	ctBoot := heRubato.HalfBoot()
 
 	valuesWant := make([]complex128, heRubato.params.Slots())

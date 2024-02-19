@@ -8,6 +8,7 @@ import (
 
 type Hera interface {
 	NewEncryptor() Encryptor
+	KeyStream(nonce []byte) HHESoK.Block
 }
 
 type hera struct {
@@ -41,7 +42,7 @@ func (her *hera) NewEncryptor() Encryptor {
 	return &encryptor{her: *her}
 }
 
-func (her *hera) keyStream(nonce []byte) (ks HHESoK.Block) {
+func (her *hera) KeyStream(nonce []byte) (ks HHESoK.Block) {
 	// init Shake256
 	her.initShake(nonce)
 	// init state with values between 1 and BlockSize

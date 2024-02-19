@@ -83,7 +83,7 @@ func (hR *HERubato) InitParams(paramIndex int, symParams rubato.Parameter, plain
 	hR.paramIndex = paramIndex
 	hR.symParams = symParams
 	hR.outSize = symParams.BlockSize - 4
-	hR.hbtpParams = ckks.RtFRubatoParams[0]
+	hR.hbtpParams = ckks.RtFRubatoParams[0] // using Rubato 128af
 	hR.params, err = hR.hbtpParams.Params()
 	if err != nil {
 		panic(err)

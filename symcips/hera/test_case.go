@@ -27,18 +27,22 @@ const (
 )
 
 type TestContext struct {
-	TC         TestCase
-	Params     Parameter
-	Key        HHESoK.Key
-	Plaintext  HHESoK.Plaintext
-	Ciphertext HHESoK.Ciphertext
+	TC           TestCase
+	FVParamIndex int
+	Radix        int
+	Params       Parameter
+	Key          HHESoK.Key
+	Plaintext    HHESoK.Plaintext
+	Ciphertext   HHESoK.Ciphertext
 }
 
 // TestVector Test Vectors
 var TestVector = []TestContext{
 	//	HERA 80 bits security
 	{
-		TC: ENC,
+		TC:           ENC,
+		FVParamIndex: HR80F,
+		Radix:        2,
 		Params: Parameter{
 			BlockSize: 16,
 			Modulus:   ckks_fv.RtFHeraParams[HR80F].PlainModulus,
@@ -84,7 +88,9 @@ var TestVector = []TestContext{
 		Ciphertext: HHESoK.Ciphertext{},
 	},
 	{
-		TC: ENC,
+		TC:           ENC,
+		FVParamIndex: HR80S,
+		Radix:        0,
 		Params: Parameter{
 			BlockSize: 16,
 			Modulus:   ckks_fv.RtFHeraParams[HR80S].PlainModulus,
@@ -129,7 +135,9 @@ var TestVector = []TestContext{
 		Ciphertext: HHESoK.Ciphertext{},
 	},
 	{
-		TC: ENC,
+		TC:           ENC,
+		FVParamIndex: HR80AF,
+		Radix:        2,
 		Params: Parameter{
 			BlockSize: 16,
 			Modulus:   ckks_fv.RtFHeraParams[HR80AF].PlainModulus,
@@ -174,7 +182,9 @@ var TestVector = []TestContext{
 		Ciphertext: HHESoK.Ciphertext{},
 	},
 	{
-		TC: ENC,
+		TC:           ENC,
+		FVParamIndex: HR80AS,
+		Radix:        0,
 		Params: Parameter{
 			BlockSize: 16,
 			Modulus:   ckks_fv.RtFHeraParams[HR80AS].PlainModulus,
@@ -220,7 +230,9 @@ var TestVector = []TestContext{
 	},
 	//	HERA 128 bits security
 	{
-		TC: ENC,
+		TC:           ENC,
+		FVParamIndex: HR128F,
+		Radix:        2,
 		Params: Parameter{
 			BlockSize: 16,
 			Modulus:   ckks_fv.RtFHeraParams[HR128F].PlainModulus,
@@ -265,7 +277,9 @@ var TestVector = []TestContext{
 		Ciphertext: HHESoK.Ciphertext{},
 	},
 	{
-		TC: ENC,
+		TC:           ENC,
+		FVParamIndex: HR128S,
+		Radix:        0,
 		Params: Parameter{
 			BlockSize: 16,
 			Modulus:   ckks_fv.RtFHeraParams[HR128S].PlainModulus,
@@ -310,7 +324,9 @@ var TestVector = []TestContext{
 		Ciphertext: HHESoK.Ciphertext{},
 	},
 	{
-		TC: ENC,
+		TC:           ENC,
+		FVParamIndex: HR128AF,
+		Radix:        2,
 		Params: Parameter{
 			BlockSize: 16,
 			Modulus:   ckks_fv.RtFHeraParams[HR128AF].PlainModulus,
@@ -355,7 +371,9 @@ var TestVector = []TestContext{
 		Ciphertext: HHESoK.Ciphertext{},
 	},
 	{
-		TC: ENC,
+		TC:           ENC,
+		FVParamIndex: HR128AS,
+		Radix:        2,
 		Params: Parameter{
 			BlockSize: 16,
 			Modulus:   ckks_fv.RtFHeraParams[HR128AS].PlainModulus,
