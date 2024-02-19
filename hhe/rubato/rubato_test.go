@@ -26,7 +26,8 @@ func TestRubato(t *testing.T) {
 }
 
 func testHERubato(t *testing.T, tc rubato.TestContext) {
-	var heRubato HERubato
+	heRubato := NewHERubato()
+
 	heRubato.InitParams(ckks.RUBATO128S, tc.Params, len(tc.Plaintext))
 
 	heRubato.HEKeyGen()
