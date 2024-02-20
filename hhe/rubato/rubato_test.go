@@ -2,7 +2,7 @@ package rubato
 
 import (
 	"HHESoK"
-	ckks "HHESoK/ckks_integration/ckks_fv"
+	ckks "HHESoK/rtf_ckks_integration/ckks_fv"
 	"HHESoK/symcips/rubato"
 	"crypto/rand"
 	"fmt"

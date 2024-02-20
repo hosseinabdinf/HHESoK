@@ -2,7 +2,7 @@ package hera
 
 import (
 	"HHESoK"
-	"HHESoK/ckks_integration/ckks_fv"
+	"HHESoK/rtf_ckks_integration/ckks_fv"
 )
 
 type TestCase int
@@ -53,7 +53,8 @@ var TestVector = []TestContext{
 			0x422bf14, 0xebeebc5, 0xaccbfb5, 0x7445893,
 			0x62b4f8, 0x5ff653c, 0x2558d94, 0xb9d1aea,
 			0x4ffbf51, 0xf1dc323, 0xabbc1ac, 0x99cce83},
-		Plaintext: HHESoK.Plaintext{0x4f7ec94, 0x4d8e45a, 0x365cd14, 0x7a459a4,
+		Plaintext: HHESoK.Plaintext{
+			0x4f7ec94, 0x4d8e45a, 0x365cd14, 0x7a459a4,
 			0xef484d9, 0xa4ae3f6, 0xdebfb39, 0xce3516,
 			0x2c015c0, 0x92de0c6, 0xea71f98, 0xecc0e0a,
 			0xdb3c8ab, 0xae2b41b, 0xe31504b, 0xaf909a4,

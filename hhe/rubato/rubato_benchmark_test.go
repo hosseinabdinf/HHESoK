@@ -1,7 +1,7 @@
 package rubato
 
 import (
-	"HHESoK/ckks_integration/ckks_fv"
+	"HHESoK/rtf_ckks_integration/ckks_fv"
 	"HHESoK/symcips/rubato"
 	"crypto/rand"
 	"fmt"
@@ -17,7 +17,7 @@ func BenchmarkRubato(b *testing.B) {
 	}
 	// uncomment following line if you want to use manual test case
 	// you can choose test cased from [0-2]
-	//benchHERubato(rubato.TestsVector[2], b)
+	// benchHERubato(rubato.TestsVector[2], b)
 }
 
 func benchHERubato(tc rubato.TestContext, b *testing.B) {
@@ -96,7 +96,6 @@ func benchHERubato(tc rubato.TestContext, b *testing.B) {
 	heRubato.ScaleCiphertext(fvKeyStreams)
 
 	// half bootstrapping
-	var _ *ckks_fv.Ciphertext
 	b.Run("Rubato/HalfBoot", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			_ = heRubato.HalfBoot()

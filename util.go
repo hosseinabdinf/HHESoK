@@ -1,7 +1,7 @@
 package HHESoK
 
 import (
-	"HHESoK/ckks_integration/utils"
+	"HHESoK/rtf_ckks_integration/utils"
 	"crypto/rand"
 	"encoding/csv"
 	"fmt"
@@ -34,6 +34,7 @@ type Logger interface {
 	PrintMessage(message string)
 	PrintMessages(messages ...interface{})
 	PrintDataLen(data []uint64)
+	HandleError(err error)
 }
 
 func (l logger) PrintMessage(message string) {
@@ -53,6 +54,13 @@ func (l logger) PrintMessages(messages ...interface{}) {
 func (l logger) PrintDataLen(data []uint64) {
 	if l.debug {
 		fmt.Printf("Len: %d, Data: %d \n", len(data), data)
+	}
+}
+
+func (l logger) HandleError(err error) {
+	if err != nil {
+		fmt.Printf("!!! Error: %s\n", err.Error())
+		panic(" >>> Oops! ------------------------- ")
 	}
 }
 

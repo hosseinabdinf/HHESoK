@@ -32,19 +32,6 @@ func (hepa *hePasta) NewHEPasta() {
 	panic("implement me")
 }
 
-func (hepa *hePasta) addRC(state *rlwe.Ciphertext, roundConstants HHESoK.Block) (res *rlwe.Ciphertext) {
-	rcs := bfv.NewPlaintext(hepa.bfvParams, hepa.bfvParams.MaxLevel())
-	err := hepa.encoder.Encode(roundConstants, rcs)
-	if err != nil {
-		panic(err)
-	}
-	res, err = hepa.evaluator.AddNew(state, rcs)
-	if err != nil {
-		panic(err)
-	}
-	return res
-}
-
 func (hepa *hePasta) sBoxCube(state *rlwe.Ciphertext) (res *rlwe.Ciphertext) {
 	res = state.CopyNew()
 	res, err := hepa.evaluator.MulRelinNew(state, state)

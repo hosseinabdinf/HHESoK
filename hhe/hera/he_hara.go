@@ -2,8 +2,8 @@ package hera
 
 import (
 	"HHESoK"
-	ckks "HHESoK/ckks_integration/ckks_fv"
-	"HHESoK/ckks_integration/utils"
+	ckks "HHESoK/rtf_ckks_integration/ckks_fv"
+	"HHESoK/rtf_ckks_integration/utils"
 	"HHESoK/symcips/hera"
 	"crypto/rand"
 	"math"
@@ -85,7 +85,7 @@ func (hH *HEHera) InitParams(paramIndex int, symParams hera.Parameter) {
 	hH.paramIndex = paramIndex
 	hH.symParams = symParams
 	hH.outSize = symParams.BlockSize
-	hH.hbtpParams = ckks.RtFHeraParams[2] // using Hera 128af
+	hH.hbtpParams = ckks.RtFHeraParams[paramIndex] // set to 2, using Hera 128af
 	hH.params, err = hH.hbtpParams.Params()
 	if err != nil {
 		panic(err)

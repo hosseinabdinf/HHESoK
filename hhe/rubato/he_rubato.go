@@ -2,8 +2,8 @@ package rubato
 
 import (
 	"HHESoK"
-	ckks "HHESoK/ckks_integration/ckks_fv"
-	"HHESoK/ckks_integration/utils"
+	ckks "HHESoK/rtf_ckks_integration/ckks_fv"
+	"HHESoK/rtf_ckks_integration/utils"
 	"HHESoK/symcips/rubato"
 	"crypto/rand"
 	"math"
@@ -246,5 +246,3 @@ func (hR *HERubato) HalfBoot() *ckks.Ciphertext {
 	ctBoot, _ = hR.hbtp.HalfBoot(hR.ciphertext, false)
 	return ctBoot
 }
-
-// func (hR HERubato)

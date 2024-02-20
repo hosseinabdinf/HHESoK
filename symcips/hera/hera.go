@@ -2,7 +2,7 @@ package hera
 
 import (
 	"HHESoK"
-	"HHESoK/ckks_integration/ckks_fv"
+	"HHESoK/rtf_ckks_integration/ckks_fv"
 	"golang.org/x/crypto/sha3"
 )
 

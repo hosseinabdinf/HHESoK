@@ -3,7 +3,7 @@ module HHESoK
 go 1.20
 
 //replace (
-//	HHESoK/ckks_integration/ => ./ckks_integration/
+//	HHESoK/rtf_ckks_integration/ => ./rtf_ckks_integration/
 //)
 
 require (

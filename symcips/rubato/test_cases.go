@@ -2,7 +2,7 @@ package rubato
 
 import (
 	"HHESoK"
-	"HHESoK/ckks_integration/ckks_fv"
+	"HHESoK/rtf_ckks_integration/ckks_fv"
 )
 
 type TestCase int
