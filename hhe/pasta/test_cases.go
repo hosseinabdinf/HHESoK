@@ -3,7 +3,7 @@ package pasta
 import (
 	"HHESoK"
 	"HHESoK/sym/pasta"
-	"github.com/tuneinsight/lattigo/v5/core/rlwe"
+	"math"
 )
 
 type TestCase int
@@ -15,7 +15,9 @@ const (
 
 type TestContext struct {
 	Tc            TestCase
+	UseBsGs       bool
 	Params        Parameter
+	SymParams     pasta.Parameter
 	Key           HHESoK.Key
 	Plaintext     HHESoK.Plaintext
 	ExpCipherText HHESoK.Ciphertext
@@ -23,23 +25,20 @@ type TestContext struct {
 
 // Decryption Test Vectors
 var pasta3TestVector = []TestContext{
-	{Tc: DEC,
+	{
+		Tc:      DEC,
+		UseBsGs: true,
 		Params: Parameter{
-			secretKey: nil,
-			params: pasta.Parameter{
-				KeySize:    256,
-				PlainSize:  128,
-				CipherSize: 128,
-				Rounds:     3,
-				Modulus:    65537,
-			},
-			plainMod:           65537,
-			modDegree:          16384,
-			secretKeyEncrypted: nil,
-			heSK:               rlwe.SecretKey{},
-			hePK:               rlwe.PublicKey{},
-			heRK:               rlwe.RelinearizationKey{},
-			heEVK:              rlwe.EvaluationKey{},
+			logN:      14,
+			plainMod:  65537,
+			modDegree: uint64(math.Pow(2, 14)),
+		},
+		SymParams: pasta.Parameter{
+			KeySize:    256,
+			PlainSize:  128,
+			CipherSize: 128,
+			Rounds:     3,
+			Modulus:    65537,
 		},
 		Key: HHESoK.Key{
 			0x07a30, 0x0cfe2, 0x03bbb, 0x06ab7, 0x0de0b, 0x0c36c, 0x01c39, 0x019e0,
@@ -109,23 +108,20 @@ var pasta3TestVector = []TestContext{
 			0x04fc0, 0x0f505, 0x01f14, 0x09eea, 0x081d0, 0x0ca4f, 0x016d5, 0x0f2fb,
 			0x0a3ed, 0x03868, 0x09ea1, 0x0c657, 0x0b8e3, 0x05663, 0x07a04, 0x02e7b},
 	},
-	{Tc: DEC,
+	{
+		Tc:      DEC,
+		UseBsGs: true,
 		Params: Parameter{
-			secretKey: nil,
-			params: pasta.Parameter{
-				KeySize:    265,
-				PlainSize:  128,
-				CipherSize: 128,
-				Rounds:     3,
-				Modulus:    8088322049,
-			},
-			plainMod:           8088322049,
-			modDegree:          32768,
-			secretKeyEncrypted: nil,
-			heSK:               rlwe.SecretKey{},
-			hePK:               rlwe.PublicKey{},
-			heRK:               rlwe.RelinearizationKey{},
-			heEVK:              rlwe.EvaluationKey{},
+			logN:      15,
+			plainMod:  8088322049,
+			modDegree: uint64(math.Pow(2, 15)),
+		},
+		SymParams: pasta.Parameter{
+			KeySize:    256,
+			PlainSize:  128,
+			CipherSize: 128,
+			Rounds:     3,
+			Modulus:    8088322049,
 		},
 		Key: HHESoK.Key{
 			0x02d65ac52, 0x1c6b45d1c, 0x1cb39041d, 0x0a114487b, 0x1bd58169e,
@@ -237,23 +233,20 @@ var pasta3TestVector = []TestContext{
 			0x05bd57ced, 0x1694e381d, 0x04e5da0c6, 0x0681d0549, 0x03037bb4d,
 			0x00e62d01a, 0x14fb2137e, 0x0a9c2c126},
 	},
-	{Tc: DEC,
+	{
+		Tc:      DEC,
+		UseBsGs: true,
 		Params: Parameter{
-			secretKey: nil,
-			params: pasta.Parameter{
-				KeySize:    256,
-				PlainSize:  128,
-				CipherSize: 128,
-				Rounds:     3,
-				Modulus:    1096486890805657601,
-			},
-			plainMod:           1096486890805657601,
-			modDegree:          32768,
-			secretKeyEncrypted: nil,
-			heSK:               rlwe.SecretKey{},
-			hePK:               rlwe.PublicKey{},
-			heRK:               rlwe.RelinearizationKey{},
-			heEVK:              rlwe.EvaluationKey{},
+			logN:      15,
+			plainMod:  1096486890805657601,
+			modDegree: uint64(math.Pow(2, 15)),
+		},
+		SymParams: pasta.Parameter{
+			KeySize:    256,
+			PlainSize:  128,
+			CipherSize: 128,
+			Rounds:     3,
+			Modulus:    1096486890805657601,
 		},
 		Key: HHESoK.Key{
 			0x892f9ff42160c81, 0xa652a61d10eabf3, 0x76bb71c0ddc0c06,
@@ -438,23 +431,19 @@ var pasta3TestVector = []TestContext{
 
 var pasta4TestVector = []TestContext{
 	{
-		Tc: DEC,
+		Tc:      DEC,
+		UseBsGs: true,
 		Params: Parameter{
-			secretKey: nil,
-			params: pasta.Parameter{
-				KeySize:    64,
-				PlainSize:  32,
-				CipherSize: 32,
-				Rounds:     4,
-				Modulus:    65537,
-			},
-			plainMod:           65537,
-			modDegree:          16384,
-			secretKeyEncrypted: nil,
-			heSK:               rlwe.SecretKey{},
-			hePK:               rlwe.PublicKey{},
-			heRK:               rlwe.RelinearizationKey{},
-			heEVK:              rlwe.EvaluationKey{},
+			logN:      14,
+			plainMod:  65537,
+			modDegree: uint64(math.Pow(2, 14)),
+		},
+		SymParams: pasta.Parameter{
+			KeySize:    64,
+			PlainSize:  32,
+			CipherSize: 32,
+			Rounds:     4,
+			Modulus:    65537,
 		},
 		Key: HHESoK.Key{0x07a30, 0x0cfe2, 0x03bbb, 0x06ab7, 0x0de0b, 0x0c36c, 0x01c39, 0x019e0,
 			0x0e09c, 0x04441, 0x0c560, 0x00fd4, 0x0c611, 0x0a3fd, 0x0d408, 0x01b17,
@@ -473,25 +462,22 @@ var pasta4TestVector = []TestContext{
 			0x09b4c, 0x00747, 0x0d484, 0x005ad, 0x0674c, 0x07fd1, 0x00a34, 0x036c7,
 			0x014dc, 0x08b83, 0x000e7, 0x00097, 0x0b3c3, 0x08fe2, 0x08833, 0x0fad5},
 	}, {
-		Tc: DEC,
+		Tc:      DEC,
+		UseBsGs: true,
 		Params: Parameter{
-			secretKey: nil,
-			params: pasta.Parameter{
-				KeySize:    64,
-				PlainSize:  32,
-				CipherSize: 32,
-				Rounds:     4,
-				Modulus:    8088322049,
-			},
-			plainMod:           8088322049,
-			modDegree:          32768,
-			secretKeyEncrypted: nil,
-			heSK:               rlwe.SecretKey{},
-			hePK:               rlwe.PublicKey{},
-			heRK:               rlwe.RelinearizationKey{},
-			heEVK:              rlwe.EvaluationKey{},
+			logN:      15,
+			plainMod:  8088322049,
+			modDegree: uint64(math.Pow(2, 15)),
 		},
-		Key: HHESoK.Key{0x02d65ac52, 0x1c6b45d1c, 0x1cb39041d, 0x0a114487b, 0x1bd58169e,
+		SymParams: pasta.Parameter{
+			KeySize:    64,
+			PlainSize:  32,
+			CipherSize: 32,
+			Rounds:     4,
+			Modulus:    8088322049,
+		},
+		Key: HHESoK.Key{
+			0x02d65ac52, 0x1c6b45d1c, 0x1cb39041d, 0x0a114487b, 0x1bd58169e,
 			0x06687bfc2, 0x0f2ca10ae, 0x08147165f, 0x145bd33c0, 0x1d93385c2,
 			0x045108f23, 0x0d464ef68, 0x162009aed, 0x0bb4cf340, 0x0a963c1ee,
 			0x08b633c3a, 0x13b1c1deb, 0x0275b464a, 0x170637204, 0x06b6f143c,
@@ -504,14 +490,16 @@ var pasta4TestVector = []TestContext{
 			0x1c26ea8ed, 0x059002810, 0x0fa25328b, 0x12b6e9cec, 0x0b4833bbc,
 			0x09b81028c, 0x0b34aca5d, 0x14222b758, 0x11eb0c39f, 0x0507b4400,
 			0x030d2efb0, 0x127eba731, 0x1b8a7492f, 0x07bff1aba},
-		Plaintext: HHESoK.Plaintext{0x0a9d7ee71, 0x0c90649e1, 0x1d7c84c0c, 0x0ff157150, 0x08e504486,
+		Plaintext: HHESoK.Plaintext{
+			0x0a9d7ee71, 0x0c90649e1, 0x1d7c84c0c, 0x0ff157150, 0x08e504486,
 			0x12fd420d3, 0x01a765891, 0x15fb5d252, 0x16d7167b2, 0x1a7b55501,
 			0x015f940f9, 0x1d0b529fd, 0x0dbe47bdd, 0x0982689f2, 0x12c12edd6,
 			0x161dc5f79, 0x0193bbf50, 0x1acd44f12, 0x087d1b8af, 0x191c3b01d,
 			0x1b6448ad4, 0x00d642b16, 0x15d8d4f73, 0x153e9e398, 0x13e649512,
 			0x00c4ab812, 0x06fa9952e, 0x01b98d1cb, 0x1bbbecba9, 0x02af6a0f0,
 			0x04d186add, 0x0fec36c9f},
-		ExpCipherText: HHESoK.Ciphertext{0x10ae630f6, 0x1b342593c, 0x1a22703a3, 0x11278da7e, 0x0b485f348,
+		ExpCipherText: HHESoK.Ciphertext{
+			0x10ae630f6, 0x1b342593c, 0x1a22703a3, 0x11278da7e, 0x0b485f348,
 			0x06a4c80be, 0x1b3884552, 0x0f609df0d, 0x0127dd394, 0x01f442434,
 			0x083aa9d7e, 0x1e0a5397c, 0x11ff33a95, 0x0caa10205, 0x0dd55c747,
 			0x0ebd5afc5, 0x0fb174004, 0x0d9fa8d9c, 0x03e7d8764, 0x1daffa094,
@@ -520,25 +508,22 @@ var pasta4TestVector = []TestContext{
 			0x163a9d740, 0x04616d469},
 	},
 	{
-		Tc: DEC,
+		Tc:      DEC,
+		UseBsGs: true,
 		Params: Parameter{
-			secretKey: nil,
-			params: pasta.Parameter{
-				KeySize:    64,
-				PlainSize:  32,
-				CipherSize: 32,
-				Rounds:     4,
-				Modulus:    1096486890805657601,
-			},
-			plainMod:           1096486890805657601,
-			modDegree:          65536,
-			secretKeyEncrypted: nil,
-			heSK:               rlwe.SecretKey{},
-			hePK:               rlwe.PublicKey{},
-			heRK:               rlwe.RelinearizationKey{},
-			heEVK:              rlwe.EvaluationKey{},
+			logN:      16,
+			plainMod:  1096486890805657601,
+			modDegree: uint64(math.Pow(2, 16)),
 		},
-		Key: HHESoK.Key{0x892f9ff42160c81, 0xa652a61d10eabf3, 0x76bb71c0ddc0c06,
+		SymParams: pasta.Parameter{
+			KeySize:    64,
+			PlainSize:  32,
+			CipherSize: 32,
+			Rounds:     4,
+			Modulus:    1096486890805657601,
+		},
+		Key: HHESoK.Key{
+			0x892f9ff42160c81, 0xa652a61d10eabf3, 0x76bb71c0ddc0c06,
 			0xcd4219dc5300904, 0xb555b02f174ea12, 0xaf3a4ea03c081fd,
 			0x2e5ca6dc0c3122a, 0x73c7bb66bee9643, 0x68568756417a3da,
 			0x50be80234874982, 0xbfb0b39827ac73f, 0x8d81bf84a35fec7,
@@ -560,7 +545,8 @@ var pasta4TestVector = []TestContext{
 			0x699f6fe0bb1d5e9, 0x5462145417efe53, 0x5620afd8fbec20c,
 			0x299441cee16006b, 0x9024a5c56a850b3, 0x7e1c8b36109665e,
 			0xe9309b3e7aee84e},
-		Plaintext: HHESoK.Plaintext{0x2aa5d63323b492e, 0x2c446aca8382269, 0x65d6cf211ad468f,
+		Plaintext: HHESoK.Plaintext{
+			0x2aa5d63323b492e, 0x2c446aca8382269, 0x65d6cf211ad468f,
 			0x4f997af101353dd, 0x72221017a1e3cf1, 0x4e58a96f11cc1aa,
 			0x7f73eef090cb64d, 0xe69f4a33955927f, 0xc292e2153508085,
 			0x831a7b528d5dcb0, 0x0384050467f8cad, 0x13561ec00440024,
@@ -571,7 +557,8 @@ var pasta4TestVector = []TestContext{
 			0x46ca45df444df89, 0x2bd3b108c679045, 0x57bd4754f3b7658,
 			0x998b49ccb600a3c, 0xea09f24b56715ff, 0x254f9248660345e,
 			0xbcf4a6f51de5192, 0x0e947999e1a2462},
-		ExpCipherText: HHESoK.Ciphertext{0x32a4ba9024be5d4, 0xe8138ae01a5041a, 0xc617ed6a9fda31d,
+		ExpCipherText: HHESoK.Ciphertext{
+			0x32a4ba9024be5d4, 0xe8138ae01a5041a, 0xc617ed6a9fda31d,
 			0x0b336acb93fa88c, 0x5587b75ea723a0b, 0x511fc73deab089e,
 			0x0fa145a9fdecc85, 0x6ccb3a489ad23f7, 0xb81577ff440ef1c,
 			0x836920bab807949, 0x57030d916bc954c, 0xd2991852da26e09,

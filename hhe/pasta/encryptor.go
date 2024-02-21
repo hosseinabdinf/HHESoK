@@ -3,7 +3,6 @@ package pasta
 import (
 	"HHESoK"
 	"github.com/tuneinsight/lattigo/v5/core/rlwe"
-	"github.com/tuneinsight/lattigo/v5/schemes/bfv"
 )
 
 type Encryptor interface {
@@ -14,7 +13,7 @@ type Encryptor interface {
 }
 
 type encryptor struct {
-	hepa hePasta
+	//hepa hePasta
 }
 
 // Encrypt plaintext
@@ -40,25 +39,25 @@ func (enc encryptor) Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext {
 }
 
 func (enc encryptor) EncryptSymKey(batchEncoder bool) (key *rlwe.Ciphertext) {
-	fvParams := enc.hepa.bfvParams
-	sKey := enc.hepa.params.secretKey
-	T := enc.hepa.params.plainMod
-	halfSlots := enc.hepa.halfSlots
-
-	tempKey := make(HHESoK.Key, halfSlots+T)
-	for i := uint64(0); i < T; i++ {
-		tempKey[i] = sKey[i]
-		tempKey[i+halfSlots] = sKey[i+T]
-	}
-	pKey := bfv.NewPlaintext(fvParams, fvParams.MaxLevel())
-	err := enc.hepa.encoder.Encode(tempKey, pKey)
-	if err != nil {
-		panic(err)
-	}
-	err = enc.hepa.encryptor.Encrypt(pKey, key)
-	if err != nil {
-		panic(err)
-	}
+	//fvParams := enc.hepa.bfvParams
+	//sKey := enc.hepa.params.secretKey
+	//T := enc.hepa.params.plainMod
+	//halfSlots := enc.hepa.halfSlots
+	//
+	//tempKey := make(HHESoK.Key, halfSlots+T)
+	//for i := uint64(0); i < T; i++ {
+	//	tempKey[i] = sKey[i]
+	//	tempKey[i+halfSlots] = sKey[i+T]
+	//}
+	//pKey := bfv.NewPlaintext(fvParams, fvParams.MaxLevel())
+	//err := enc.hepa.encoder.Encode(tempKey, pKey)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//err = enc.hepa.encryptor.Encrypt(pKey, key)
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	return
 }
@@ -71,16 +70,16 @@ func (enc encryptor) EncryptSymKey(batchEncoder bool) (key *rlwe.Ciphertext) {
 
 // Decrypt homomorphic ciphertext
 func (enc encryptor) Decrypt(ciphertexts *rlwe.Ciphertext) (res HHESoK.Plaintext) {
-	params := enc.hepa.params
-	dec := enc.hepa.decryptor
-	en := enc.hepa.encoder
-
-	res = make(HHESoK.Plaintext, params.GetPlainSize())
-	plaintext := dec.DecryptNew(ciphertexts)
-	err := en.Decode(plaintext, res)
-	if err != nil {
-		panic(err)
-	}
-
+	//params := enc.hepa.params
+	//dec := enc.hepa.decryptor
+	//en := enc.hepa.encoder
+	//
+	//res = make(HHESoK.Plaintext, params.GetPlainSize())
+	//plaintext := dec.DecryptNew(ciphertexts)
+	//err := en.Decode(plaintext, res)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
 	return
 }

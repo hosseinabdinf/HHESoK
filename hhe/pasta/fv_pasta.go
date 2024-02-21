@@ -12,8 +12,9 @@ import (
 )
 
 type MFVPasta interface {
-	Crypt() (nonce uint64, kCt *rlwe.Ciphertext, dCt HHESoK.Ciphertext)
+	Crypt(nonce uint64, kCt *rlwe.Ciphertext, dCt HHESoK.Ciphertext) (res []*rlwe.Ciphertext)
 	EncKey(key []uint64) (res *rlwe.Ciphertext)
+	AddGkIndices()
 }
 
 type mfvPasta struct {
@@ -34,12 +35,12 @@ type mfvPasta struct {
 
 	state *rlwe.Ciphertext
 
-	N        int
-	useBatch bool
-	useBsGs  bool
-	bsGsN1   uint64
-	bsGsN2   uint64
-
+	logN      int
+	useBatch  bool
+	useBsGs   bool
+	bsGsN1    uint64
+	bsGsN2    uint64
+	gkIndices []int
 	pas       pasta.Pasta
 	bfvParams bfv.Parameters
 	encryptor rlwe.Encryptor
@@ -55,7 +56,6 @@ func NEWMFVPasta(modDegree uint64, params pasta.Parameter, encoder bfv.Encoder, 
 	fvPasta := new(mfvPasta)
 	fvPasta.logger = HHESoK.NewLogger(HHESoK.DEBUG)
 
-	fvPasta.N = 0
 	fvPasta.useBatch = true
 	fvPasta.useBsGs = false
 	fvPasta.bsGsN1 = 0
@@ -78,9 +78,6 @@ func NEWMFVPasta(modDegree uint64, params pasta.Parameter, encoder bfv.Encoder, 
 	// set mps to the maximum value that can be represented with mps bits
 	mps = (1 << mps) - 1
 
-	// init empty states
-	//fvPasta.state = make(*rlwe.Ciphertext, params.GetPlainSize())
-
 	return fvPasta
 }
 
@@ -90,9 +87,10 @@ func (pas *mfvPasta) Crypt(nonce uint64, kCt *rlwe.Ciphertext, dCt HHESoK.Cipher
 
 	res = make([]*rlwe.Ciphertext, numBlock)
 
+	// state = homomorphically encrypted key
+	pas.state = kCt.CopyNew()
 	for b := uint64(0); b < numBlock; b++ {
 		pas.initShake(nonce, b)
-		state := kCt.CopyNew()
 		R := pas.numRound
 		for r := 1; r <= R; r++ {
 			pas.logger.PrintMessages(">>> Round: ", r, " <<<")
@@ -124,12 +122,12 @@ func (pas *mfvPasta) Crypt(nonce uint64, kCt *rlwe.Ciphertext, dCt HHESoK.Cipher
 
 		var sIndex = b * pas.plainSize
 		var eIndex = int(math.Min(float64((b+1)*pas.plainSize), float64(size)))
-		tempCipher := dCt[sIndex:eIndex]
+		symCt := dCt[sIndex:eIndex]
 		plaintext := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
-		_ = pas.encoder.Encode(tempCipher, plaintext)
+		_ = pas.encoder.Encode(symCt, plaintext)
 		// negate state
-		state, _ = pas.evaluator.MulNew(state, -1)
-		res[b], _ = pas.evaluator.AddNew(state, plaintext)
+		pas.state, _ = pas.evaluator.MulNew(pas.state, -1)
+		res[b], _ = pas.evaluator.AddNew(pas.state, plaintext)
 	}
 	return
 }
@@ -149,6 +147,19 @@ func (pas *mfvPasta) EncKey(key []uint64) (res *rlwe.Ciphertext) {
 	pas.logger.HandleError(err)
 
 	return
+}
+
+func (pas *mfvPasta) AddGkIndices() {
+	pas.gkIndices = append(pas.gkIndices, 0)
+	pas.gkIndices = append(pas.gkIndices, -1)
+	if pas.plainSize*2 != pas.modDegree {
+		pas.gkIndices = append(pas.gkIndices, int(pas.plainSize))
+	}
+	if pas.useBsGs {
+		for k := uint64(1); k < pas.bsGsN2; k++ {
+			pas.gkIndices = append(pas.gkIndices, -int(k*pas.bsGsN1))
+		}
+	}
 }
 
 // ///////////////////////		PASTA's homomorphic functions		///////////////////////

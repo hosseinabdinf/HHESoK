@@ -59,8 +59,8 @@ func (l logger) PrintDataLen(data []uint64) {
 
 func (l logger) HandleError(err error) {
 	if err != nil {
-		fmt.Printf("!!! Error: %s\n", err.Error())
-		panic(" >>> Oops! ------------------------- ")
+		fmt.Printf("=== LOGGER Error: %s\n", err.Error())
+		panic("=== LOGGER Panic: \n ")
 	}
 }
 
