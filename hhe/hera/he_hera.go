@@ -4,7 +4,7 @@ import (
 	"HHESoK"
 	ckks "HHESoK/rtf_ckks_integration/ckks_fv"
 	"HHESoK/rtf_ckks_integration/utils"
-	"HHESoK/symcips/hera"
+	"HHESoK/sym/hera"
 	"crypto/rand"
 	"math"
 )

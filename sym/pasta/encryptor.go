@@ -26,7 +26,7 @@ func (enc encryptor) Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext {
 	copy(ciphertext, plaintext)
 
 	for b := uint64(0); b < uint64(numBlock); b++ {
-		keyStream := enc.pas.keyStream(nonce, b)
+		keyStream := enc.pas.KeyStream(nonce, b)
 		for i := b * plainSize; i < (b+1)*plainSize && i < size; i++ {
 			ciphertext[i] = (ciphertext[i] + keyStream[i-b*plainSize]) % modulus
 		}
@@ -49,7 +49,7 @@ func (enc encryptor) Decrypt(ciphertext HHESoK.Ciphertext) HHESoK.Plaintext {
 
 	var b uint64 = 0
 	for b = 0; b < numBlock; b++ {
-		keyStream := enc.pas.keyStream(nonce, b)
+		keyStream := enc.pas.KeyStream(nonce, b)
 		for i := b * cipherSize; i < (b+1)*cipherSize && i < size; i++ {
 			if keyStream[i-b*plainSize] > plaintext[i] {
 				plaintext[i] += modulus

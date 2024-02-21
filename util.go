@@ -207,12 +207,12 @@ func RandomFloatDataGen(col int, row int) (data [][]float64) {
 //	plaintext := func() []uint64 {
 //		result := make([]uint64, len(data[s]))
 //		for i, v := range data[s] {
-//			result[i] = symcips.ScaleUp(v, delta)
+//			result[i] = sym.ScaleUp(v, delta)
 //		}
 //		return result
 //	}()
 //	fmt.Println("Len: ", len(plaintext), " - OG: ", data[0])
-//	symcips.Uint64ToHex(plaintext)
+//	sym.Uint64ToHex(plaintext)
 //fmt.Println(">  Encrypt() the data[", s, "]")
 
 // RotateSlice to rotate a slice by a given offset

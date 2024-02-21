@@ -2,7 +2,7 @@ package pasta
 
 import (
 	"HHESoK"
-	"HHESoK/symcips/pasta"
+	"HHESoK/sym/pasta"
 	"github.com/tuneinsight/lattigo/v5/core/rlwe"
 	"github.com/tuneinsight/lattigo/v5/he/heint"
 	"github.com/tuneinsight/lattigo/v5/schemes/bfv"
