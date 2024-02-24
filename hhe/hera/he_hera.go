@@ -152,7 +152,6 @@ func (hH *HEHera) InitEvaluator() {
 }
 
 func (hH *HEHera) InitCoefficients() {
-	// Encode float data added by key stream to plaintext coefficients
 	hH.coefficients = make([][]float64, hH.outSize)
 	for s := 0; s < hH.outSize; s++ {
 		hH.coefficients[s] = make([]float64, hH.params.N())

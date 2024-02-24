@@ -300,7 +300,8 @@ func (rubato *mfvRubato) CryptAutoModSwitch(nonce [][]byte, counter []byte, kCt 
 	return rubato.stCt, rubatoModDown
 }
 
-// Compute ciphertexts with modulus switching as given in rubatoModDown
+// Crypt compute ciphertexts with modulus switching as given in rubatoModDown
+// using the homomorphically encrypted secret key `kCt`, `nonce`, `counter`
 func (rubato *mfvRubato) Crypt(nonce [][]byte, counter []byte, kCt []*Ciphertext, rubatoModDown []int) []*Ciphertext {
 	if rubatoModDown[0] != rubato.nbInitModDown {
 		errorString := fmt.Sprintf("nbInitModDown expected %d but %d given", rubato.nbInitModDown, rubatoModDown[0])

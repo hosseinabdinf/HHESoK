@@ -132,7 +132,6 @@ func (hR *HERubato) InitEvaluator() {
 // InitCoefficients initialize the coefficient matrix
 // coefficients = [output size * number of block]
 func (hR *HERubato) InitCoefficients() {
-	// Encode float data added by key stream to plaintext coefficients
 	hR.coefficients = make([][]float64, hR.outSize)
 	for s := 0; s < hR.outSize; s++ {
 		hR.coefficients[s] = make([]float64, hR.N)

@@ -236,3 +236,16 @@ func Reverse(slice Block) {
 		slice[i], slice[j] = slice[j], slice[i]
 	}
 }
+
+// ResizeSlice resize the old slice
+func ResizeSlice(oldSlice Block, newLen uint64) (newSlice Block) {
+	l := uint64(len(oldSlice))
+	if newLen == l {
+		newSlice = oldSlice
+	} else if newLen > l {
+		newSlice = append(oldSlice, make(Block, newLen-l)...)
+	} else {
+		newSlice = oldSlice[:newLen]
+	}
+	return
+}

@@ -15,7 +15,6 @@ const (
 
 type TestContext struct {
 	Tc            TestCase
-	UseBsGs       bool
 	Params        Parameter
 	SymParams     pasta.Parameter
 	Key           HHESoK.Key
@@ -26,9 +25,11 @@ type TestContext struct {
 // Decryption Test Vectors
 var pasta3TestVector = []TestContext{
 	{
-		Tc:      DEC,
-		UseBsGs: true,
+		Tc: DEC,
 		Params: Parameter{
+			UseBsGs:   true,
+			bSgSN1:    16,
+			bSgSN2:    8,
 			logN:      14,
 			plainMod:  65537,
 			modDegree: uint64(math.Pow(2, 14)),
@@ -109,9 +110,11 @@ var pasta3TestVector = []TestContext{
 			0x0a3ed, 0x03868, 0x09ea1, 0x0c657, 0x0b8e3, 0x05663, 0x07a04, 0x02e7b},
 	},
 	{
-		Tc:      DEC,
-		UseBsGs: true,
+		Tc: DEC,
 		Params: Parameter{
+			UseBsGs:   true,
+			bSgSN1:    16,
+			bSgSN2:    8,
 			logN:      15,
 			plainMod:  8088322049,
 			modDegree: uint64(math.Pow(2, 15)),
@@ -234,10 +237,12 @@ var pasta3TestVector = []TestContext{
 			0x00e62d01a, 0x14fb2137e, 0x0a9c2c126},
 	},
 	{
-		Tc:      DEC,
-		UseBsGs: true,
+		Tc: DEC,
 		Params: Parameter{
+			UseBsGs:   true,
 			logN:      15,
+			bSgSN1:    16,
+			bSgSN2:    8,
 			plainMod:  1096486890805657601,
 			modDegree: uint64(math.Pow(2, 15)),
 		},
@@ -431,9 +436,11 @@ var pasta3TestVector = []TestContext{
 
 var pasta4TestVector = []TestContext{
 	{
-		Tc:      DEC,
-		UseBsGs: true,
+		Tc: DEC,
 		Params: Parameter{
+			UseBsGs:   true,
+			bSgSN1:    8,
+			bSgSN2:    4,
 			logN:      14,
 			plainMod:  65537,
 			modDegree: uint64(math.Pow(2, 14)),
@@ -461,10 +468,13 @@ var pasta4TestVector = []TestContext{
 			0x0b3dd, 0x07975, 0x0928b, 0x01024, 0x0632e, 0x07702, 0x05ca1, 0x08e2d,
 			0x09b4c, 0x00747, 0x0d484, 0x005ad, 0x0674c, 0x07fd1, 0x00a34, 0x036c7,
 			0x014dc, 0x08b83, 0x000e7, 0x00097, 0x0b3c3, 0x08fe2, 0x08833, 0x0fad5},
-	}, {
-		Tc:      DEC,
-		UseBsGs: true,
+	},
+	{
+		Tc: DEC,
 		Params: Parameter{
+			UseBsGs:   true,
+			bSgSN1:    8,
+			bSgSN2:    4,
 			logN:      15,
 			plainMod:  8088322049,
 			modDegree: uint64(math.Pow(2, 15)),
@@ -508,9 +518,11 @@ var pasta4TestVector = []TestContext{
 			0x163a9d740, 0x04616d469},
 	},
 	{
-		Tc:      DEC,
-		UseBsGs: true,
+		Tc: DEC,
 		Params: Parameter{
+			UseBsGs:   true,
+			bSgSN1:    8,
+			bSgSN2:    4,
 			logN:      16,
 			plainMod:  1096486890805657601,
 			modDegree: uint64(math.Pow(2, 16)),

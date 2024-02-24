@@ -12,9 +12,12 @@ import (
 )
 
 type MFVPasta interface {
-	Crypt(nonce uint64, kCt *rlwe.Ciphertext, dCt HHESoK.Ciphertext) (res []*rlwe.Ciphertext)
-	EncKey(key []uint64) (res *rlwe.Ciphertext)
-	AddGkIndices()
+	Crypt(nonce uint64, kCt []*rlwe.Ciphertext, dCt HHESoK.Ciphertext) (res []*rlwe.Ciphertext)
+	CryptPack(nonce uint64, kCt *rlwe.Ciphertext, dCt HHESoK.Ciphertext) (res []*rlwe.Ciphertext)
+	EncKey(key []uint64) (res []*rlwe.Ciphertext)
+	EncKeyPack(key []uint64) (res *rlwe.Ciphertext)
+	GetGaloisElements(dataSize int) []uint64
+	UpdateEvaluator(evaluator *bfv.Evaluator)
 }
 
 type mfvPasta struct {
@@ -24,14 +27,13 @@ type mfvPasta struct {
 	plainSize    uint64
 	slots        uint64
 	halfSlots    uint64
-	plainMod     uint64
-	modDegree    uint64
 	modulus      uint64
+	modDegree    uint64
 	maxPrimeSize uint64
 
 	shake sha3.ShakeHash
-	mat1  HHESoK.Matrix
-	mat2  HHESoK.Matrix
+	mat1  [][]uint64
+	mat2  [][]uint64
 
 	state *rlwe.Ciphertext
 
@@ -41,33 +43,42 @@ type mfvPasta struct {
 	bsGsN1    uint64
 	bsGsN2    uint64
 	gkIndices []int
-	pas       pasta.Pasta
+
 	bfvParams bfv.Parameters
-	encryptor rlwe.Encryptor
-	decryptor rlwe.Decryptor
-	encoder   bfv.Encoder
-	evaluator bfv.Evaluator
+	encoder   *bfv.Encoder
+	evaluator *bfv.Evaluator
+	encryptor *rlwe.Encryptor
 
 	rcPt *rlwe.Plaintext
-	rc   HHESoK.Block
+	rc   []uint64
 }
 
-func NEWMFVPasta(modDegree uint64, params pasta.Parameter, encoder bfv.Encoder, encryptor rlwe.Encryptor, evaluator bfv.Evaluator) MFVPasta {
+func NEWMFVPasta(params Parameter, fvParams bfv.Parameters, symParams pasta.Parameter, encoder *bfv.Encoder, encryptor *rlwe.Encryptor, evaluator *bfv.Evaluator) MFVPasta {
 	fvPasta := new(mfvPasta)
 	fvPasta.logger = HHESoK.NewLogger(HHESoK.DEBUG)
 
+	fvPasta.bfvParams = fvParams
+	fvPasta.numRound = symParams.Rounds
+	fvPasta.plainSize = uint64(symParams.PlainSize)
+
+	fvPasta.logN = fvParams.LogN()
+	fvPasta.modDegree = params.modDegree
+	fvPasta.slots = uint64(fvParams.MaxSlots())
+	fvPasta.halfSlots = uint64(math.Ceil(float64(fvPasta.slots / 2)))
+	fvPasta.modulus = fvParams.PlaintextModulus()
+
 	fvPasta.useBatch = true
-	fvPasta.useBsGs = false
-	fvPasta.bsGsN1 = 0
-	fvPasta.bsGsN2 = 0
-	fvPasta.modDegree = modDegree
+	fvPasta.useBsGs = params.UseBsGs
+	fvPasta.bsGsN1 = uint64(params.bSgSN1)
+	fvPasta.bsGsN2 = uint64(params.bSgSN2)
+	fvPasta.gkIndices = make([]int, 0)
 
 	fvPasta.encoder = encoder
 	fvPasta.encryptor = encryptor
 	fvPasta.evaluator = evaluator
 
 	mps := uint64(0) // max prime size
-	prime := modDegree
+	prime := fvPasta.modDegree
 
 	// count the number of valid bits of prime number, using shift to right operation
 	for prime > 0 {
@@ -78,10 +89,92 @@ func NEWMFVPasta(modDegree uint64, params pasta.Parameter, encoder bfv.Encoder, 
 	// set mps to the maximum value that can be represented with mps bits
 	mps = (1 << mps) - 1
 
+	fvPasta.maxPrimeSize = mps
+
 	return fvPasta
 }
 
-func (pas *mfvPasta) Crypt(nonce uint64, kCt *rlwe.Ciphertext, dCt HHESoK.Ciphertext) (res []*rlwe.Ciphertext) {
+// Crypt tranciphers SYM.Enc(dCt) into HE.Enc(res)
+// Parameters:
+//
+//	nonce
+//	kCt: homomorphically encrypted symmetric key
+//	dCt: symmetrically encrypted ciphertext
+//
+// Returns:
+//
+//	res: homomorphically encrypted cipher
+func (pas *mfvPasta) Crypt(nonce uint64, kCt []*rlwe.Ciphertext, dCt HHESoK.Ciphertext) (res []*rlwe.Ciphertext) {
+	size := len(dCt)
+	numBlock := uint64(math.Ceil(float64(size / int(pas.plainSize))))
+
+	res = make([]*rlwe.Ciphertext, numBlock)
+
+	states := make([]*rlwe.Ciphertext, len(kCt))
+
+	for i := uint64(0); i < pas.plainSize; i++ {
+		states[i] = kCt[i].CopyNew()
+	}
+	// state = homomorphically encrypted key
+	//pas.state = kCt.CopyNew()
+	for b := uint64(0); b < numBlock; b++ {
+		pas.initShake(nonce, b)
+		R := pas.numRound
+		for r := 1; r <= R; r++ {
+			pas.logger.PrintMessages(">>> Round: ", r, " <<<")
+			// initialize random matrices and random constant
+			pas.mat1 = pas.genRandomMatrix()
+			pas.mat2 = pas.genRandomMatrix()
+			pas.rc = pas.genRcVector(pas.halfSlots)
+
+			// PASTA key stream generation circuit
+			pas.matMul()
+			pas.addRC()
+			pas.mix()
+
+			if r == R {
+				pas.sBoxCube()
+			} else {
+				pas.sBoxFeistel()
+			}
+			//	print noise for state in each round
+		}
+		//	final addition
+		pas.mat1 = pas.genRandomMatrix()
+		pas.mat2 = pas.genRandomMatrix()
+		pas.rc = pas.genRcVector(pas.halfSlots)
+
+		pas.matMul()
+		pas.addRC()
+		pas.mix()
+
+		// Q: do we need to remove the second vector?
+		// A: there's no need for that
+
+		// converting
+		var sIndex = b * pas.plainSize
+		var eIndex = int(math.Min(float64((b+1)*pas.plainSize), float64(size)))
+		symCt := dCt[sIndex:eIndex]
+		plaintext := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+		_ = pas.encoder.Encode(symCt, plaintext)
+		// negate state
+		pas.state, _ = pas.evaluator.MulNew(pas.state, -1)
+		res[b], _ = pas.evaluator.AddNew(pas.state, plaintext)
+	}
+	return
+}
+
+// CryptPack tranciphers SYM.Enc(dCt) into HE.Enc(res)
+// Parameters:
+//
+//	nonce
+//	kCt: homomorphically encrypted symmetric key
+//	dCt: symmetrically encrypted ciphertext
+//
+// Returns:
+//
+//	res: homomorphically encrypted cipher
+func (pas *mfvPasta) CryptPack(nonce uint64, kCt *rlwe.Ciphertext, dCt HHESoK.Ciphertext) (res []*rlwe.Ciphertext) {
 	size := len(dCt)
 	numBlock := uint64(math.Ceil(float64(size / int(pas.plainSize))))
 
@@ -120,6 +213,10 @@ func (pas *mfvPasta) Crypt(nonce uint64, kCt *rlwe.Ciphertext, dCt HHESoK.Cipher
 		pas.addRC()
 		pas.mix()
 
+		// Q: do we need to remove the second vector?
+		// A: there's no need for that
+
+		// converting
 		var sIndex = b * pas.plainSize
 		var eIndex = int(math.Min(float64((b+1)*pas.plainSize), float64(size)))
 		symCt := dCt[sIndex:eIndex]
@@ -132,27 +229,95 @@ func (pas *mfvPasta) Crypt(nonce uint64, kCt *rlwe.Ciphertext, dCt HHESoK.Cipher
 	return
 }
 
-func (pas *mfvPasta) EncKey(key []uint64) (res *rlwe.Ciphertext) {
-	tmpKey := make([]uint64, pas.halfSlots+pas.plainSize)
+func (pas *mfvPasta) EncKey(key []uint64) (res []*rlwe.Ciphertext) {
+	slots := pas.slots
+	res = make([]*rlwe.Ciphertext, pas.plainSize)
+
 	for i := uint64(0); i < pas.plainSize; i++ {
-		tmpKey[i] = key[i]
-		tmpKey[i+pas.halfSlots] = key[i+pas.plainSize]
+		dupKey := make([]uint64, slots)
+		for j := uint64(0); j < slots; j++ {
+			dupKey[j] = key[i]
+		}
+
+		keyPt := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+		err := pas.encoder.Encode(dupKey[i], keyPt)
+		pas.logger.HandleError(err)
+
+		res[i], err = pas.encryptor.EncryptNew(keyPt)
+		pas.logger.HandleError(err)
+	}
+
+	return
+}
+
+func (pas *mfvPasta) EncKeyPack(key []uint64) (res *rlwe.Ciphertext) {
+
+	dupKey := make([]uint64, pas.halfSlots+pas.plainSize)
+
+	for i := uint64(0); i < pas.plainSize; i++ {
+		dupKey[i] = key[i]
+		dupKey[i+pas.halfSlots] = key[i+pas.plainSize]
 	}
 
 	pKey := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
-	err := pas.encoder.Encode(tmpKey, pKey)
+	err := pas.encoder.Encode(dupKey, pKey)
 	pas.logger.HandleError(err)
 
-	err = pas.encryptor.Encrypt(pKey, res)
+	res, err = pas.encryptor.EncryptNew(pKey)
 	pas.logger.HandleError(err)
 
 	return
 }
 
-func (pas *mfvPasta) AddGkIndices() {
+func (pas *mfvPasta) GetGaloisElements(dataSize int) []uint64 {
+	pas.prepareGkIndices(dataSize)
+	galEls := make([]uint64, len(pas.gkIndices))
+	for i, k := range pas.gkIndices {
+		if k == 0 {
+			galEls[i] = pas.bfvParams.GaloisElementForRowRotation()
+		} else {
+			galEls[i] = pas.bfvParams.GaloisElementForColRotation(k)
+		}
+	}
+	return galEls
+}
+
+func (pas *mfvPasta) UpdateEvaluator(evaluator *bfv.Evaluator) {
+	pas.evaluator = evaluator
+}
+
+// prepareGkIndices generates gkIndices required for galois elements generation
+func (pas *mfvPasta) prepareGkIndices(dataSize int) {
+	rM := uint64(dataSize) % pas.plainSize
+	numBlock := uint64(math.Ceil(float64(dataSize / int(pas.plainSize))))
+
+	if rM > 0 {
+		numBlock++
+	}
+
+	var flattenGks []int
+	for b := uint64(1); b < numBlock; b++ {
+		flattenGks = append(flattenGks, -int(b*pas.plainSize))
+	}
+
+	pas.addGkIndices()
+
+	// add flatten gks
+	for i := 0; i < len(flattenGks); i++ {
+		pas.gkIndices = append(pas.gkIndices, flattenGks[i])
+	}
+
+	if pas.useBsGs {
+		pas.addBsGsIndices()
+	} else {
+		pas.addDiagonalIndices(dataSize)
+	}
+}
+
+func (pas *mfvPasta) addGkIndices() {
 	pas.gkIndices = append(pas.gkIndices, 0)
 	pas.gkIndices = append(pas.gkIndices, -1)
-	if pas.plainSize*2 != pas.modDegree {
+	if pas.plainSize*2 != pas.slots {
 		pas.gkIndices = append(pas.gkIndices, int(pas.plainSize))
 	}
 	if pas.useBsGs {
@@ -162,8 +327,26 @@ func (pas *mfvPasta) AddGkIndices() {
 	}
 }
 
-// ///////////////////////		PASTA's homomorphic functions		///////////////////////
+func (pas *mfvPasta) addBsGsIndices() {
+	mul := pas.bsGsN1 * pas.bsGsN2
+	pas.addDiagonalIndices(int(mul))
+	if pas.bsGsN1 == 1 || pas.bsGsN2 == 1 {
+		return
+	}
+	for k := uint64(1); k < pas.bsGsN2; k++ {
+		pas.gkIndices = append(pas.gkIndices, int(k*pas.bsGsN1))
+	}
+}
 
+func (pas *mfvPasta) addDiagonalIndices(size int) {
+	if uint64(size)*2 != pas.slots {
+		pas.gkIndices = append(pas.gkIndices, -size)
+	}
+	pas.gkIndices = append(pas.gkIndices, 1)
+}
+
+// ///////////////////////		PASTA's homomorphic functions		///////////////////////
+// addRC add round constant to the state
 func (pas *mfvPasta) addRC() {
 	pas.rcPt = bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 	err := pas.encoder.Encode(pas.rc, pas.rcPt)
@@ -187,13 +370,13 @@ func (pas *mfvPasta) sBoxFeistel() {
 	pas.logger.HandleError(err)
 
 	// generate masks
-	masks := make(HHESoK.Block, pas.plainMod+pas.halfSlots)
+	masks := make([]uint64, pas.plainSize+pas.halfSlots)
 	for i := range masks {
 		masks[i] = 1
 	}
 	masks[0] = 0
 	masks[pas.halfSlots] = 0
-	for i := pas.plainMod; i < pas.halfSlots; i++ {
+	for i := pas.plainSize; i < pas.halfSlots; i++ {
 		masks[i] = 0
 	}
 	maskPlaintext := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
@@ -221,7 +404,7 @@ func (pas *mfvPasta) matMul() {
 
 func (pas *mfvPasta) babyStepGiantStep() {
 	var err error
-	matrixDim := pas.plainMod
+	matrixDim := pas.plainSize
 	slots := pas.slots
 
 	if (matrixDim*2 != slots) && (matrixDim*4 > slots) {
@@ -235,8 +418,8 @@ func (pas *mfvPasta) babyStepGiantStep() {
 	// Prepare diagonal
 	matrix := make([]*rlwe.Plaintext, matrixDim)
 	for i := uint64(0); i < matrixDim; i++ {
-		diag := make(HHESoK.Block, matrixDim+pas.halfSlots)
-		tmp := make(HHESoK.Block, matrixDim)
+		diag := make([]uint64, matrixDim+pas.halfSlots)
+		tmp := make([]uint64, matrixDim)
 
 		k := i / pas.bsGsN1
 		for j := uint64(0); j < matrixDim; j++ {
@@ -251,13 +434,13 @@ func (pas *mfvPasta) babyStepGiantStep() {
 		}
 
 		//	non-full pack rotation
-		if pas.halfSlots != pas.plainMod {
-			diag = diag[:pas.halfSlots]
-			tmp = tmp[:pas.halfSlots]
+		if pas.halfSlots != pas.plainSize {
+			diag = HHESoK.ResizeSlice(diag, pas.halfSlots)
+			tmp = HHESoK.ResizeSlice(tmp, pas.halfSlots)
 
 			// Perform the element swapping loop
 			for m := uint64(0); m < k*pas.bsGsN1; m++ {
-				indexSrc := pas.plainMod - 1 - m
+				indexSrc := pas.plainSize - 1 - m
 				indexDest := pas.halfSlots - 1 - m
 				diag[indexDest] = diag[indexSrc]
 				diag[indexSrc] = 0
@@ -267,7 +450,7 @@ func (pas *mfvPasta) babyStepGiantStep() {
 		}
 
 		// Combine both diags
-		diag = append(diag, make([]uint64, pas.halfSlots)...)
+		diag = HHESoK.ResizeSlice(diag, pas.slots)
 		for j := pas.halfSlots; j < slots; j++ {
 			diag[j] = tmp[j-pas.halfSlots]
 		}
@@ -279,9 +462,9 @@ func (pas *mfvPasta) babyStepGiantStep() {
 	}
 
 	//	non-full-packed rotation
-	if pas.halfSlots != pas.plainMod {
+	if pas.halfSlots != pas.plainSize {
 		stateRotate := pas.state.CopyNew()
-		err = pas.evaluator.RotateColumns(pas.state, int(pas.plainMod), stateRotate)
+		err = pas.evaluator.RotateColumns(pas.state, int(pas.plainSize), stateRotate)
 		pas.logger.HandleError(err)
 		err = pas.evaluator.Add(pas.state, stateRotate, pas.state)
 		pas.logger.HandleError(err)
@@ -292,7 +475,7 @@ func (pas *mfvPasta) babyStepGiantStep() {
 
 	var outerSum *rlwe.Ciphertext
 	for j := uint64(1); j < pas.bsGsN1; j++ {
-		err = pas.evaluator.RotateColumns(rotates[j-1], -1, rotates[j])
+		rotates[j], err = pas.evaluator.RotateColumnsNew(rotates[j-1], -1)
 		pas.logger.HandleError(err)
 	}
 
@@ -314,7 +497,7 @@ func (pas *mfvPasta) babyStepGiantStep() {
 
 func (pas *mfvPasta) diagonal() {
 	var err error
-	matrixDim := pas.plainMod
+	matrixDim := pas.plainSize
 	slots := pas.slots
 
 	if (matrixDim*2 != slots) && (matrixDim*4 > slots) {
@@ -330,7 +513,7 @@ func (pas *mfvPasta) diagonal() {
 	//	prepare diagonal method
 	matrix := make([]*rlwe.Plaintext, matrixDim)
 	for i := uint64(0); i < matrixDim; i++ {
-		diag := make(HHESoK.Block, matrixDim+pas.halfSlots)
+		diag := make([]uint64, matrixDim+pas.halfSlots)
 		for j := range diag {
 			diag[j] = 0
 		}
@@ -382,11 +565,11 @@ func (pas *mfvPasta) initShake(nonce uint64, counter uint64) {
 	pas.shake = shake
 }
 
-func (pas *mfvPasta) genRandomMatrix() HHESoK.Matrix {
+func (pas *mfvPasta) genRandomMatrix() [][]uint64 {
 	ps := pas.plainSize
-	mat := make(HHESoK.Matrix, ps) // mat[ps][ps]
+	mat := make([][]uint64, ps) // mat[ps][ps]
 	for i := range mat {
-		mat[i] = make(HHESoK.Block, ps) // mat[i] = [ps]
+		mat[i] = make([]uint64, ps) // mat[i] = [ps]
 	}
 	mat[0] = pas.genRandomVector(false)
 	for j := uint64(1); j < ps; j++ {
@@ -395,9 +578,9 @@ func (pas *mfvPasta) genRandomMatrix() HHESoK.Matrix {
 	return mat
 }
 
-func (pas *mfvPasta) genRcVector(size uint64) HHESoK.Block {
+func (pas *mfvPasta) genRcVector(size uint64) []uint64 {
 	ps := pas.plainSize
-	rc := make(HHESoK.Block, size+ps)
+	rc := make([]uint64, size+ps)
 	for i := uint64(0); i < ps; i++ {
 		rc[i] = pas.generateRandomFieldElement(false)
 	}
@@ -407,9 +590,9 @@ func (pas *mfvPasta) genRcVector(size uint64) HHESoK.Block {
 	return rc
 }
 
-func (pas *mfvPasta) genRandomVector(allowZero bool) HHESoK.Block {
+func (pas *mfvPasta) genRandomVector(allowZero bool) []uint64 {
 	ps := pas.plainSize
-	rc := make(HHESoK.Block, ps)
+	rc := make([]uint64, ps)
 	for i := uint64(0); i < ps; i++ {
 		rc[i] = pas.generateRandomFieldElement(allowZero)
 	}
@@ -429,16 +612,16 @@ func (pas *mfvPasta) generateRandomFieldElement(allowZero bool) uint64 {
 			continue
 		}
 
-		if fieldElement < pas.plainMod {
+		if fieldElement < pas.modulus {
 			return fieldElement
 		}
 	}
 }
 
-func (pas *mfvPasta) calculateRow(previousRow, firstRow HHESoK.Block) HHESoK.Block {
+func (pas *mfvPasta) calculateRow(previousRow, firstRow []uint64) []uint64 {
 	ps := pas.plainSize
-	modulus := new(big.Int).SetUint64(pas.plainMod)
-	output := make(HHESoK.Block, ps)
+	modulus := new(big.Int).SetUint64(pas.modulus)
+	output := make([]uint64, ps)
 	// =======================================
 	pRow := new(big.Int).SetUint64(previousRow[ps-1])
 

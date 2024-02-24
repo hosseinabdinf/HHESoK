@@ -39,7 +39,7 @@ func testHERubato(t *testing.T, tc rubato.TestContext) {
 
 	heRubato.InitCoefficients()
 
-	// // use the plaintext data from test vector or generate Random
+	// use the plaintext data from test vector or generate Random ones for full coefficients
 	data := heRubato.RandomDataGen()
 
 	// need an array of 8-byte nonce for each block of data
@@ -51,20 +51,22 @@ func testHERubato(t *testing.T, tc rubato.TestContext) {
 
 	// generate key stream using plain rubato
 	keyStream := make([][]uint64, heRubato.params.N())
+	symRub := rubato.NewRubato(tc.Key, tc.Params)
 	for i := 0; i < heRubato.params.N(); i++ {
-		symRub := rubato.NewRubato(tc.Key, tc.Params)
 		keyStream[i] = symRub.KeyStream(nonces[i], counter)
 	}
 
 	// data to coefficients
 	heRubato.DataToCoefficients(data)
 
+	// simulate the data encryption on client side and encode the result into polynomial representations
 	heRubato.EncodeEncrypt(keyStream)
 
 	heRubato.ScaleUp()
 
-	// FV Key Stream, encrypts symmetric key stream using BFV on the client side
 	_ = heRubato.InitFvRubato()
+
+	// encrypts symmetric master key using BFV on the client side
 	heRubato.EncryptSymKey(tc.Key)
 
 	// get BFV key stream using encrypted symmetric key, nonce, and counter on the server side

@@ -52,8 +52,8 @@ func testHEHera(t *testing.T, tc hera.TestContext) {
 		nonces = heHera.NonceGen(heHera.params.N())
 
 		keyStream = make([][]uint64, heHera.params.N())
+		symHera := hera.NewHera(tc.Key, tc.Params)
 		for i := 0; i < heHera.params.N(); i++ {
-			symHera := hera.NewHera(tc.Key, tc.Params)
 			keyStream[i] = symHera.KeyStream(nonces[i])
 		}
 
@@ -67,8 +67,8 @@ func testHEHera(t *testing.T, tc hera.TestContext) {
 		nonces = heHera.NonceGen(heHera.params.Slots())
 
 		keyStream = make([][]uint64, heHera.params.Slots())
+		symHera := hera.NewHera(tc.Key, tc.Params)
 		for i := 0; i < heHera.params.Slots(); i++ {
-			symHera := hera.NewHera(tc.Key, tc.Params)
 			keyStream[i] = symHera.KeyStream(nonces[i])
 		}
 
@@ -79,8 +79,9 @@ func testHEHera(t *testing.T, tc hera.TestContext) {
 
 	heHera.ScaleUp()
 
-	// FV Key Stream, encrypts symmetric key stream using BFV on the client side
 	_ = heHera.InitFvHera()
+
+	// encrypts symmetric master key using BFV on the client side
 	heHera.EncryptSymKey(tc.Key)
 
 	// get BFV key stream using encrypted symmetric key, nonce, and counter on the server side
