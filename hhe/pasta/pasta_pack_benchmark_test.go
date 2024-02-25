@@ -4,6 +4,7 @@ import (
 	"HHESoK"
 	"HHESoK/sym/pasta"
 	"encoding/binary"
+	"fmt"
 	"github.com/tuneinsight/lattigo/v5/core/rlwe"
 	"testing"
 )
@@ -13,12 +14,11 @@ func BenchmarkPasta3Pack(b *testing.B) {
 	// it helps to get benchmark results when there's memory limit in the
 	// test environment
 	//for _, tc := range pasta3TestVector {
-	//	fmt.Println(testString("PASTA-3", tc.SymParams))
 	//	benchHEPastaPack(tc, b)
 	//}
 	// uncomment following line if you want to use manual test case
 	// you can choose test cased from [0-2]
-	benchHEPasta(pasta3TestVector[0], b)
+	benchHEPastaPack(pasta3TestVector[0], b)
 }
 
 func BenchmarkPasta4Pack(b *testing.B) {
@@ -31,10 +31,12 @@ func BenchmarkPasta4Pack(b *testing.B) {
 	//}
 	// uncomment following line if you want to use manual test case
 	// you can choose test cased from [0-2]
-	benchHEPasta(pasta4TestVector[0], b)
+	benchHEPastaPack(pasta4TestVector[0], b)
 }
 
 func benchHEPastaPack(tc TestContext, b *testing.B) {
+	fmt.Println(testString("PASTA", tc.SymParams))
+
 	if testing.Short() {
 		b.Skip("skipping benchmark in short mode.")
 	}

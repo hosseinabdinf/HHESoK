@@ -9,22 +9,21 @@ import (
 )
 
 func TestPasta3Pack(t *testing.T) {
-	//for _, tc := range pasta3TestVector {
-	//  fmt.Println(testString("PASTA-3", tc.SymParams))
-	//	testHEPasta(t, tc)
-	//}
+	for _, tc := range pasta3TestVector {
+		fmt.Println(testString("PASTA-3", tc.SymParams))
+		testHEPastaPack(t, tc)
+	}
 
-	testHEPastaPack(t, pasta3TestVector[0])
+	//testHEPastaPack(t, pasta3TestVector[0])
 }
 
 func TestPasta4Pack(t *testing.T) {
-	//logger := HHESoK.NewLogger(HHESoK.DEBUG)
-	//for _, tc := range pasta4TestVector {
-	//	fmt.Println(testString("PASTA-4", tc.SymParams))
-	//	logger.PrintDataLen(tc.Key)
-	//	testHEPasta(t, tc)
-	//}
-	testHEPastaPack(t, pasta3TestVector[0])
+	for _, tc := range pasta4TestVector {
+		fmt.Println(testString("PASTA-4", tc.SymParams))
+		testHEPastaPack(t, tc)
+	}
+
+	//testHEPastaPack(t, pasta3TestVector[0])
 }
 
 func testHEPastaPack(t *testing.T, tc TestContext) {
