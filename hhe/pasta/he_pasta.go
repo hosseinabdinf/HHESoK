@@ -98,8 +98,7 @@ func (pas *HEPasta) InitFvPasta() MFVPasta {
 	return pas.fvPasta
 }
 
-func (pas *HEPasta) InitEvaluator(dCt HHESoK.Ciphertext) {
-	dataSize := len(dCt)
+func (pas *HEPasta) CreateGaloisKeys(dataSize int) {
 	pas.rlk = pas.keyGenerator.GenRelinearizationKeyNew(pas.sk)
 	galEls := pas.fvPasta.GetGaloisElements(dataSize)
 	pas.glk = pas.keyGenerator.GenGaloisKeysNew(galEls, pas.sk)

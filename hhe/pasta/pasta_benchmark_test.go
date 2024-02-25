@@ -54,14 +54,14 @@ func benchHEPasta(tc TestContext, b *testing.B) {
 
 	_ = hePasta.InitFvPasta()
 
-	b.Run("PASTA/HalfBootKeyGen", func(b *testing.B) {
+	b.Run("PASTA/GaloisKeysGen", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			hePasta.InitEvaluator(tc.ExpCipherText)
+			hePasta.CreateGaloisKeys(len(tc.ExpCipherText))
 		}
 	})
 
 	//encrypts symmetric master key using BFV on the client side
-	b.Run("PASTA/SymKeyStream", func(b *testing.B) {
+	b.Run("PASTA/EncryptSymKey", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			hePasta.EncryptSymKey(tc.Key)
 		}

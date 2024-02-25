@@ -42,43 +42,35 @@ func testHEPastaPack(t *testing.T, tc TestContext) {
 	fmt.Println("InitFvPasta")
 	_ = hePastaPack.InitFvPasta()
 
-	fmt.Println("InitCoefficients")
-	hePastaPack.InitCoefficients()
-
+	// generates Random data for full coefficients
 	fmt.Println("RandomDataGen")
-	// use the plaintext data from test vector or generate Random ones for full coefficients
 	data := hePastaPack.RandomDataGen()
 
-	fmt.Println("InitEvaluator")
-	hePastaPack.InitEvaluator(tc.ExpCipherText)
-
-	// need an array of 8-byte nonce for each block of data
-	nonces := hePastaPack.NonceGen()
-
-	// need an 8-byte counter
-	counter := make([]byte, 8)
-
 	// generate key stream
-	fmt.Println("KeyStreamGen")
-	keyStream := make([][]uint64, hePastaPack.bfvParams.N())
-	for i := 0; i < hePastaPack.bfvParams.N(); i++ {
-		symPasta := pasta.NewPasta(tc.Key, tc.SymParams)
-		binary.BigEndian.PutUint64(counter, uint64(i))
-		keyStream[i] = symPasta.KeyStream(nonces[i], counter)
-	}
+	fmt.Println("EncryptSymData")
+	symPasta := pasta.NewPasta(tc.Key, tc.SymParams)
+	symCipherTexts := symPasta.NewEncryptor().Encrypt(data)
 
-	fmt.Println("DataToCoefficients")
-	hePastaPack.DataToCoefficients(data)
-
-	// simulate the data encryption on client side and encode the result into polynomial representations
-	hePastaPack.EncodeEncrypt(keyStream)
+	// create Galois keys for evaluation
+	fmt.Println("GaloisKeysGen")
+	hePastaPack.CreateGaloisKeys(len(symCipherTexts))
 
 	// encrypts symmetric master key using BFV on the client side
 	fmt.Println("EncryptSymKey")
 	hePastaPack.EncryptSymKey(tc.Key)
 
-	////// the server side
-	fmt.Println("Trancipher")
-	hePastaPack.Trancipher(nonces, tc.ExpCipherText)
+	nonce := make([]byte, 8)
+	binary.BigEndian.PutUint64(nonce, 123456789)
 
+	// the server side tranciphering
+	fmt.Println("Trancipher")
+	fvCiphers := hePastaPack.Trancipher(nonce, symCipherTexts)
+
+	fmt.Println("Flatten")
+	ctRes := hePastaPack.Flatten(fvCiphers, len(symCipherTexts))
+
+	ptRes := hePastaPack.Decrypt(ctRes)
+
+	hePastaPack.logger.PrintDataLen(data)
+	hePastaPack.logger.PrintDataLen(ptRes)
 }

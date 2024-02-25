@@ -72,7 +72,11 @@ func benchHEHera(tc hera.TestContext, b *testing.B) {
 
 		heHera.DataToCoefficients(data, heHera.params.N())
 
-		heHera.EncodeEncrypt(keyStream, heHera.params.N())
+		b.Run("PASTA/EncryptSymData", func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				heHera.EncodeEncrypt(keyStream, heHera.params.N())
+			}
+		})
 
 	} else {
 		data = heHera.RandomDataGen(heHera.params.Slots())
@@ -91,7 +95,11 @@ func benchHEHera(tc hera.TestContext, b *testing.B) {
 
 		heHera.DataToCoefficients(data, heHera.params.Slots())
 
-		heHera.EncodeEncrypt(keyStream, heHera.params.Slots())
+		b.Run("PASTA/EncryptSymData", func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				heHera.EncodeEncrypt(keyStream, heHera.params.Slots())
+			}
+		})
 	}
 
 	heHera.ScaleUp()

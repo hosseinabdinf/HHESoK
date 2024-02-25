@@ -42,7 +42,7 @@ func testHEPasta(t *testing.T, tc TestContext) {
 
 	_ = hePasta.InitFvPasta()
 
-	hePasta.InitEvaluator(tc.ExpCipherText)
+	hePasta.CreateGaloisKeys(len(tc.ExpCipherText))
 
 	//encrypts symmetric master key using BFV on the client side
 	hePasta.EncryptSymKey(tc.Key)

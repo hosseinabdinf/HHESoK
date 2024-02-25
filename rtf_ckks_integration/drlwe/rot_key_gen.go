@@ -25,7 +25,7 @@ type RTGShare struct {
 }
 
 // RTGProtocol is the structure storing the parameters for the collective rotation-keys generation.
-type RTGProtocol struct { // TODO rename GaloisKeyGen ?
+type RTGProtocol struct { // TODO rename CreateGaloisKeys ?
 	ringQP             *ring.Ring
 	ringPModulusBigint *big.Int
 	ringQModCount      int

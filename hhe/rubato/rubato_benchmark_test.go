@@ -73,7 +73,11 @@ func benchHERubato(tc rubato.TestContext, b *testing.B) {
 	// data to coefficients
 	heRubato.DataToCoefficients(data)
 
-	heRubato.EncodeEncrypt(keyStream)
+	b.Run("PASTA/EncryptSymData", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			heRubato.EncodeEncrypt(keyStream)
+		}
+	})
 
 	heRubato.ScaleUp()
 

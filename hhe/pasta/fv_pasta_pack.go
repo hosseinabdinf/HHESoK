@@ -12,11 +12,12 @@ import (
 )
 
 type MFVPastaPack interface {
-	Crypt(nonces [][]byte, kCt []*rlwe.Ciphertext, dCt HHESoK.Ciphertext) (res []*rlwe.Ciphertext)
-	EncKey(key []uint64) (res []*rlwe.Ciphertext)
+	Crypt(nonce []byte, kCt *rlwe.Ciphertext, dCt []uint64) (res []*rlwe.Ciphertext)
+	EncKey(key []uint64) (res *rlwe.Ciphertext)
 	GetGaloisElements(dataSize int) []uint64
 	UpdateEvaluator(evaluator *bfv.Evaluator)
 	Flatten(ciphers []*rlwe.Ciphertext) (cipher *rlwe.Ciphertext)
+	Mask(cipher *rlwe.Ciphertext, mask []uint64)
 }
 
 type mfvPastaPack struct {
@@ -30,7 +31,8 @@ type mfvPastaPack struct {
 	modDegree    uint64
 	maxPrimeSize uint64
 
-	shakes []sha3.ShakeHash
+	shake  sha3.ShakeHash
+	states []*rlwe.Ciphertext
 	mat1   [][]uint64
 	mat2   [][]uint64
 
@@ -74,7 +76,6 @@ func NEWMFVPastaPack(params Parameter, fvParams bfv.Parameters, symParams pasta.
 	fvPastaPack.bsGsN1 = uint64(params.bSgSN1)
 	fvPastaPack.bsGsN2 = uint64(params.bSgSN2)
 	fvPastaPack.gkIndices = make([]int, 0)
-	fvPastaPack.shakes = make([]sha3.ShakeHash, fvPastaPack.slots)
 
 	fvPastaPack.encoder = encoder
 	fvPastaPack.encryptor = encryptor
@@ -107,23 +108,19 @@ func NEWMFVPastaPack(params Parameter, fvParams bfv.Parameters, symParams pasta.
 // Returns:
 //
 //	res: homomorphically encrypted cipher
-func (pas *mfvPastaPack) Crypt(nonces [][]byte, kCt []*rlwe.Ciphertext, dCt HHESoK.Ciphertext) (res []*rlwe.Ciphertext) {
+func (pas *mfvPastaPack) Crypt(nonce []byte, kCt *rlwe.Ciphertext, dCt []uint64) (res []*rlwe.Ciphertext) {
 	size := len(dCt)
 	numBlock := uint64(math.Ceil(float64(size / int(pas.plainSize))))
 
 	res = make([]*rlwe.Ciphertext, numBlock)
 
-	states := make([]*rlwe.Ciphertext, len(kCt))
-
-	for i := uint64(0); i < pas.plainSize; i++ {
-		states[i] = kCt[i].CopyNew()
-	}
 	// state = homomorphically encrypted key
-	//pas.state = kCt.CopyNew()
+	pas.state = kCt.CopyNew()
+
 	counter := make([]byte, 8)
 	for b := uint64(0); b < numBlock; b++ {
 		binary.BigEndian.PutUint64(counter, b)
-		pas.initShakes(nonces[b], counter)
+		pas.initShake(nonce, counter)
 		R := pas.numRound
 		for r := 1; r <= R; r++ {
 			pas.logger.PrintMessages(">>> Round: ", r, " <<<")
@@ -159,33 +156,31 @@ func (pas *mfvPastaPack) Crypt(nonces [][]byte, kCt []*rlwe.Ciphertext, dCt HHES
 		// converting
 		var sIndex = b * pas.plainSize
 		var eIndex = int(math.Min(float64((b+1)*pas.plainSize), float64(size)))
-		symCt := dCt[sIndex:eIndex]
+		cTmp := dCt[sIndex:eIndex]
 		plaintext := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
-		_ = pas.encoder.Encode(symCt, plaintext)
-		// negate state
+		_ = pas.encoder.Encode(cTmp, plaintext)
+		// negate state --> state = state * -1
 		pas.state, _ = pas.evaluator.MulNew(pas.state, -1)
+		// res = symCt + (-state)
 		res[b], _ = pas.evaluator.AddNew(pas.state, plaintext)
 	}
 	return
 }
 
-func (pas *mfvPastaPack) EncKey(key []uint64) (res []*rlwe.Ciphertext) {
-	slots := pas.slots
-	res = make([]*rlwe.Ciphertext, pas.plainSize)
+func (pas *mfvPastaPack) EncKey(key []uint64) (res *rlwe.Ciphertext) {
+	dupKey := make([]uint64, pas.halfSlots+pas.plainSize)
 
 	for i := uint64(0); i < pas.plainSize; i++ {
-		dupKey := make([]uint64, slots)
-		for j := uint64(0); j < slots; j++ {
-			dupKey[j] = key[i]
-		}
-
-		keyPt := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
-		err := pas.encoder.Encode(dupKey[i], keyPt)
-		pas.logger.HandleError(err)
-
-		res[i], err = pas.encryptor.EncryptNew(keyPt)
-		pas.logger.HandleError(err)
+		dupKey[i] = key[i]
+		dupKey[i+pas.halfSlots] = key[i+pas.plainSize]
 	}
+
+	pKey := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+	err := pas.encoder.Encode(dupKey, pKey)
+	pas.logger.HandleError(err)
+
+	res, err = pas.encryptor.EncryptNew(pKey)
+	pas.logger.HandleError(err)
 
 	return
 }
@@ -221,6 +216,17 @@ func (pas *mfvPastaPack) Flatten(ciphers []*rlwe.Ciphertext) (cipher *rlwe.Ciphe
 	}
 
 	return
+}
+
+func (pas *mfvPastaPack) Mask(cipher *rlwe.Ciphertext, mask []uint64) {
+	var err error
+	plaintext := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+
+	err = pas.encoder.Encode(mask, plaintext)
+	pas.logger.HandleError(err)
+
+	err = pas.evaluator.Mul(cipher, plaintext, cipher) // ct = ct * pt
+	pas.logger.HandleError(err)
 }
 
 // ///////////////////////		PASTA's homomorphic functions		///////////////////////
@@ -431,19 +437,15 @@ func (pas *mfvPastaPack) mix() {
 
 // ///////////////////////		PASTA's non-homomorphic functions	///////////////////////
 
-func (pas *mfvPastaPack) initShakes(nonce []byte, counter []byte) {
-	slots := pas.slots
-	for i := uint64(0); i < slots; i++ {
-		shake := sha3.NewShake128()
-		if _, err := shake.Write(nonce); err != nil {
-			panic("Failed to init SHAKE128!")
-		}
-		if _, err := shake.Write(counter); err != nil {
-			panic("Failed to init SHAKE128!")
-		}
-		pas.shakes[i] = shake
+func (pas *mfvPastaPack) initShake(nonce []byte, counter []byte) {
+	shake := sha3.NewShake128()
+	if _, err := shake.Write(nonce); err != nil {
+		panic("Failed to init SHAKE128!")
 	}
-
+	if _, err := shake.Write(counter); err != nil {
+		panic("Failed to init SHAKE128!")
+	}
+	pas.shake = shake
 }
 
 func (pas *mfvPastaPack) genRandomMatrix() [][]uint64 {
