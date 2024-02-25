@@ -4,7 +4,7 @@ import (
 	"HHESoK"
 	ckks "HHESoK/rtf_ckks_integration/ckks_fv"
 	"HHESoK/sym/rubato"
-	"crypto/rand"
+	"encoding/binary"
 	"fmt"
 	"math"
 	"testing"
@@ -47,12 +47,12 @@ func testHERubato(t *testing.T, tc rubato.TestContext) {
 
 	// need an 8-byte counter
 	counter := make([]byte, 8)
-	_, _ = rand.Read(counter)
 
 	// generate key stream using plain rubato
 	keyStream := make([][]uint64, heRubato.params.N())
-	symRub := rubato.NewRubato(tc.Key, tc.Params)
 	for i := 0; i < heRubato.params.N(); i++ {
+		symRub := rubato.NewRubato(tc.Key, tc.Params)
+		binary.BigEndian.PutUint64(counter, uint64(i))
 		keyStream[i] = symRub.KeyStream(nonces[i], counter)
 	}
 

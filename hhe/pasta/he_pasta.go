@@ -2,7 +2,6 @@ package pasta
 
 import (
 	"HHESoK"
-	"HHESoK/rtf_ckks_integration/utils"
 	"HHESoK/sym/pasta"
 	"fmt"
 	"github.com/tuneinsight/lattigo/v5/core/rlwe"
@@ -28,40 +27,32 @@ type HEPasta struct {
 	glk          []*rlwe.GaloisKey
 	evk          *rlwe.MemEvaluationKeySet
 
-	symKeyCts      []*rlwe.Ciphertext
-	symKeyCt       *rlwe.Ciphertext
-	plainBFVRingTs []*rlwe.Plaintext
-	plaintexts     []*rlwe.Plaintext
+	symKeyCt *rlwe.Ciphertext
 
-	N            int
-	outSize      int
-	coefficients [][]uint64
+	N       int
+	outSize int
 }
 
 func NewHEPasta() *HEPasta {
 	hePasta := &HEPasta{
-		logger:         HHESoK.NewLogger(HHESoK.DEBUG),
-		params:         Parameter{},
-		symParams:      pasta.Parameter{},
-		fvPasta:        nil,
-		bfvParams:      bfv.Parameters{},
-		encoder:        nil,
-		evaluator:      nil,
-		encryptor:      nil,
-		decryptor:      nil,
-		keyGenerator:   nil,
-		sk:             nil,
-		pk:             nil,
-		glk:            nil,
-		rlk:            nil,
-		evk:            nil,
-		symKeyCts:      nil,
-		symKeyCt:       nil,
-		plainBFVRingTs: nil,
-		plaintexts:     nil,
-		coefficients:   nil,
-		N:              0,
-		outSize:        0,
+		logger:       HHESoK.NewLogger(HHESoK.DEBUG),
+		params:       Parameter{},
+		symParams:    pasta.Parameter{},
+		fvPasta:      nil,
+		bfvParams:    bfv.Parameters{},
+		encoder:      nil,
+		evaluator:    nil,
+		encryptor:    nil,
+		decryptor:    nil,
+		keyGenerator: nil,
+		sk:           nil,
+		pk:           nil,
+		glk:          nil,
+		rlk:          nil,
+		evk:          nil,
+		symKeyCt:     nil,
+		N:            0,
+		outSize:      0,
 	}
 	return hePasta
 }
@@ -117,86 +108,21 @@ func (pas *HEPasta) InitEvaluator(dCt HHESoK.Ciphertext) {
 	pas.fvPasta.UpdateEvaluator(pas.evaluator)
 }
 
-// InitCoefficients initialize the coefficient matrix
-// coefficients = [out size * number of block]
-func (pas *HEPasta) InitCoefficients() {
-	pas.coefficients = make([][]uint64, pas.outSize)
-	for s := 0; s < pas.outSize; s++ {
-		pas.coefficients[s] = make([]uint64, pas.N)
-	}
-}
-
-// RandomDataGen generates the matrix of random data
-// = [output size * number of block]
-func (pas *HEPasta) RandomDataGen() (data [][]uint64) {
-	data = make([][]uint64, pas.outSize)
-	for i := 0; i < pas.outSize; i++ {
-		data[i] = make([]uint64, pas.N)
-		for j := 0; j < pas.N; j++ {
-			data[i][j] = utils.RandUint64()
-		}
-	}
-	return
-}
-
-func (pas *HEPasta) DataToCoefficients(data [][]uint64) {
-	for s := 0; s < pas.outSize; s++ {
-		for i := 0; i < pas.N/2; i++ {
-			j := utils.BitReverse64(uint64(i), uint64(pas.bfvParams.LogN()-1))
-			pas.coefficients[s][j] = data[s][i]
-			pas.coefficients[s][j+uint64(pas.N/2)] = data[s][i+pas.bfvParams.N()/2]
-		}
-	}
-}
-
-// EncodeEncrypt Encode plaintext and Encrypt with key stream
-func (pas *HEPasta) EncodeEncrypt(keystream [][]uint64) {
-	pas.plainBFVRingTs = make([]*rlwe.Plaintext, pas.outSize)
-	for s := 0; s < pas.outSize; s++ {
-		tmpPt := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
-		err := pas.encoder.Encode(pas.coefficients[s], tmpPt)
-		pas.logger.HandleError(err)
-		pas.plainBFVRingTs[s] = tmpPt
-		poly := pas.plainBFVRingTs[s].Value
-		for i := 0; i < pas.N; i++ {
-			j := utils.BitReverse64(uint64(i), uint64(pas.bfvParams.LogN()))
-			poly.Coeffs[0][j] = (poly.Coeffs[0][j] + keystream[i][s]) % pas.bfvParams.PlaintextModulus()
-		}
-	}
-}
-
 func (pas *HEPasta) EncryptSymKey(key HHESoK.Key) {
-	pas.symKeyCts = pas.fvPasta.EncKey(key)
-	pas.logger.PrintMessages(">> Symmetric Key Length: ", len(pas.symKeyCts))
-}
-
-func (pas *HEPasta) EncryptSymKeyPack(key HHESoK.Key) {
-	pas.symKeyCt = pas.fvPasta.EncKeyPack(key)
+	pas.symKeyCt = pas.fvPasta.EncKey(key)
 	pas.logger.PrintMessages(">> Symmetric Key #slots: ", pas.symKeyCt.Slots())
 }
 
-func (pas *HEPasta) Trancipher(nonce uint64, dCt HHESoK.Ciphertext) []*rlwe.Ciphertext {
-	tranCipData := pas.fvPasta.Crypt(nonce, pas.symKeyCts, dCt)
-	return tranCipData
-}
-
-func (pas *HEPasta) TrancipherPack(nonce uint64, dCt []uint64) []*rlwe.Ciphertext {
-	tranCipData := pas.fvPasta.CryptPack(nonce, pas.symKeyCt, dCt)
+func (pas *HEPasta) Trancipher(nonce []byte, dCt []uint64) []*rlwe.Ciphertext {
+	tranCipData := pas.fvPasta.Crypt(nonce, pas.symKeyCt, dCt)
 	return tranCipData
 }
 
 // Decrypt homomorphic ciphertext
-func (pas *HEPasta) Decrypt(ciphertexts *rlwe.Ciphertext) (res HHESoK.Plaintext) {
-	//params := enc.hepa.params
-	//dec := enc.hepa.decryptor
-	//en := enc.hepa.encoder
-	//
-	//res = make(HHESoK.Plaintext, params.GetPlainSize())
-	//plaintext := dec.DecryptNew(ciphertexts)
-	//err := en.Decode(plaintext, res)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	return
+func (pas *HEPasta) Decrypt(ciphertext *rlwe.Ciphertext) (res []uint64) {
+	tmp := make([]uint64, pas.bfvParams.MaxSlots())
+	pt := pas.decryptor.DecryptNew(ciphertext)
+	err := pas.encoder.Decode(pt, tmp)
+	pas.logger.HandleError(err)
+	return tmp[:pas.symParams.PlainSize]
 }

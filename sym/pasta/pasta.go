@@ -9,7 +9,7 @@ import (
 
 type Pasta interface {
 	NewEncryptor() Encryptor
-	KeyStream(nonce uint64, counter uint64) HHESoK.Block
+	KeyStream(nonce []byte, counter []byte) HHESoK.Block
 }
 
 type pasta struct {
@@ -63,14 +63,15 @@ func (pas *pasta) NewEncryptor() Encryptor {
 
 // prepareOneBlock prepare the first block and call preProcess function
 func (pas *pasta) prepareOneBlock() {
-	var nonce uint64 = 123456789
-	pas.preProcess(nonce, 0)
+	nonce := make([]byte, 8)
+	binary.BigEndian.PutUint64(nonce, uint64(123456789))
+	counter := make([]byte, 8)
+	binary.BigEndian.PutUint64(counter, uint64(1))
+	pas.preProcess(nonce, counter)
 }
 
 // preProcess make the XOF and matrices and vectors
-func (pas *pasta) preProcess(nonce uint64, counter uint64) {
-	// todo: check this one!! need to be fixed
-	// todo: for now we are not using it!
+func (pas *pasta) preProcess(nonce []byte, counter []byte) {
 	numRounds := pas.params.GetRounds()
 	pas.initShake(nonce, counter)
 	mats1 := make(HHESoK.Vector3D, numRounds+1)
@@ -87,7 +88,7 @@ func (pas *pasta) preProcess(nonce uint64, counter uint64) {
 }
 
 // KeyStream generate pasta secretKey stream based on nonce and counter
-func (pas *pasta) KeyStream(nonce uint64, counter uint64) HHESoK.Block {
+func (pas *pasta) KeyStream(nonce []byte, counter []byte) HHESoK.Block {
 	pas.initShake(nonce, counter)
 	ps := pas.params.GetPlainSize()
 
@@ -256,17 +257,14 @@ func (pas *pasta) mix() {
 }
 
 // InitShake function get nonce and counter and combine them as seed for SHAKE128
-func (pas *pasta) initShake(nonce uint64, counter uint64) {
-	seed := make([]byte, 16)
-
-	binary.BigEndian.PutUint64(seed[:8], nonce)
-	binary.BigEndian.PutUint64(seed[8:], counter)
-
+func (pas *pasta) initShake(nonce []byte, counter []byte) {
 	shake := sha3.NewShake128()
-	if _, err := shake.Write(seed); err != nil {
+	if _, err := shake.Write(nonce); err != nil {
 		panic("Failed to init SHAKE128!")
 	}
-
+	if _, err := shake.Write(counter); err != nil {
+		panic("Failed to init SHAKE128!")
+	}
 	pas.shake = shake
 }
 
