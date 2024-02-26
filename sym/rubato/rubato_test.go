@@ -21,6 +21,7 @@ func TestRubato(t *testing.T) {
 
 		t.Run("RubatoEncryptionTest", func(t *testing.T) {
 			ciphertext = encryptor.Encrypt(tc.Plaintext)
+			logger.PrintMemUsage("RubatoEncryptionTest")
 		})
 
 		t.Run("RubatoDecryptionTest", func(t *testing.T) {

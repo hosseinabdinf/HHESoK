@@ -15,12 +15,14 @@ func testString(opName string, p Parameter) string {
 func TestPasta3(t *testing.T) {
 	logger := HHESoK.NewLogger(HHESoK.DEBUG)
 	for _, tc := range pasta3TestVector {
+		fmt.Println(testString("PASTA", tc.Params))
 		pastaCipher := NewPasta(tc.Key, tc.Params)
 		encryptor := pastaCipher.NewEncryptor()
 		var ciphertext HHESoK.Ciphertext
 
 		t.Run("PastaEncryptionTest", func(t *testing.T) {
 			ciphertext = encryptor.Encrypt(tc.Plaintext)
+			logger.PrintMemUsage("Pasta3EncryptionTest")
 		})
 
 		t.Run("PastaDecryptionTest", func(t *testing.T) {
@@ -48,12 +50,14 @@ func TestPasta3(t *testing.T) {
 func TestPasta4(t *testing.T) {
 	logger := HHESoK.NewLogger(HHESoK.DEBUG)
 	for _, tc := range pasta4TestVector {
+		fmt.Println(testString("PASTA", tc.Params))
 		pastaCipher := NewPasta(tc.Key, tc.Params)
 		encryptor := pastaCipher.NewEncryptor()
 		var ciphertext HHESoK.Ciphertext
 
 		t.Run("PastaEncryptionTest", func(t *testing.T) {
 			ciphertext = encryptor.Encrypt(tc.Plaintext)
+			logger.PrintMemUsage("Pasta4EncryptionTest")
 		})
 
 		t.Run("PastaDecryptionTest", func(t *testing.T) {

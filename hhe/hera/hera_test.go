@@ -29,6 +29,7 @@ func TestHera(t *testing.T) {
 
 func testHEHera(t *testing.T, tc hera.TestContext) {
 	heHera := NewHEHera()
+	lg := heHera.logger
 
 	var data [][]float64
 	var nonces [][]byte
@@ -37,17 +38,23 @@ func testHEHera(t *testing.T, tc hera.TestContext) {
 	heHera.InitParams(tc.FVParamIndex, tc.Params)
 
 	heHera.HEKeyGen()
+	lg.PrintMemUsage("HEKeyGen")
 
 	heHera.HalfBootKeyGen(tc.Radix)
+	lg.PrintMemUsage("HalfBootKeyGen")
 
 	heHera.InitHalfBootstrapper()
+	lg.PrintMemUsage("InitHalfBootstrapper")
 
 	heHera.InitEvaluator()
+	lg.PrintMemUsage("InitEvaluator")
 
 	heHera.InitCoefficients()
+	lg.PrintMemUsage("InitCoefficients")
 
 	if heHera.fullCoefficients {
 		data = heHera.RandomDataGen(heHera.params.N())
+		lg.PrintMemUsage("RandomDataGen")
 
 		nonces = heHera.NonceGen(heHera.params.N())
 
@@ -56,13 +63,16 @@ func testHEHera(t *testing.T, tc hera.TestContext) {
 		for i := 0; i < heHera.params.N(); i++ {
 			keyStream[i] = symHera.KeyStream(nonces[i])
 		}
+		lg.PrintMemUsage("SymKeyStreamGen")
 
 		heHera.DataToCoefficients(data, heHera.params.N())
+		lg.PrintMemUsage("DataToCoefficients")
 
 		heHera.EncodeEncrypt(keyStream, heHera.params.N())
-
+		lg.PrintMemUsage("EncodeEncrypt")
 	} else {
 		data = heHera.RandomDataGen(heHera.params.Slots())
+		lg.PrintMemUsage("RandomDataGen")
 
 		nonces = heHera.NonceGen(heHera.params.Slots())
 
@@ -71,26 +81,35 @@ func testHEHera(t *testing.T, tc hera.TestContext) {
 		for i := 0; i < heHera.params.Slots(); i++ {
 			keyStream[i] = symHera.KeyStream(nonces[i])
 		}
+		lg.PrintMemUsage("SymKeyStreamGen")
 
 		heHera.DataToCoefficients(data, heHera.params.Slots())
+		lg.PrintMemUsage("DataToCoefficients")
 
 		heHera.EncodeEncrypt(keyStream, heHera.params.Slots())
+		lg.PrintMemUsage("EncodeEncrypt")
 	}
 
 	heHera.ScaleUp()
+	lg.PrintMemUsage("ScaleUp")
 
 	_ = heHera.InitFvHera()
+	lg.PrintMemUsage("InitFvHera")
 
 	// encrypts symmetric master key using BFV on the client side
 	heHera.EncryptSymKey(tc.Key)
+	lg.PrintMemUsage("EncryptSymKey")
 
 	// get BFV key stream using encrypted symmetric key, nonce, and counter on the server side
 	fvKeyStreams := heHera.GetFvKeyStreams(nonces)
+	lg.PrintMemUsage("GetFvKeyStreams")
 
 	heHera.ScaleCiphertext(fvKeyStreams)
+	lg.PrintMemUsage("ScaleCiphertext")
 
 	var ctBoot *ckks_fv.Ciphertext
 	ctBoot = heHera.HalfBoot()
+	lg.PrintMemUsage("HalfBoot")
 
 	valuesWant := make([]complex128, heHera.params.Slots())
 	for i := 0; i < heHera.params.Slots(); i++ {

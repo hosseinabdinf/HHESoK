@@ -18,7 +18,7 @@ func BenchmarkPasta3Pack(b *testing.B) {
 	//}
 	// uncomment following line if you want to use manual test case
 	// you can choose test cased from [0-2]
-	benchHEPastaPack(pasta3TestVector[2], b)
+	benchHEPastaPack(pasta3TestVector[1], b)
 }
 
 func BenchmarkPasta4Pack(b *testing.B) {
@@ -49,6 +49,7 @@ func benchHEPastaPack(tc TestContext, b *testing.B) {
 	hePastaPack.InitParams(tc.Params, tc.SymParams)
 
 	b.Run("PASTA/HEKeyGen", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			hePastaPack.HEKeyGen()
 		}
@@ -62,12 +63,14 @@ func benchHEPastaPack(tc TestContext, b *testing.B) {
 	symPasta := pasta.NewPasta(tc.Key, tc.SymParams)
 	var symCipherTexts HHESoK.Ciphertext
 	b.Run("PASTA/EncryptSymData", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			symCipherTexts = symPasta.NewEncryptor().Encrypt(data)
 		}
 	})
 
 	// create Galois keys for evaluation
+	b.ResetTimer()
 	b.Run("PASTA/GaloisKeysGen", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			hePastaPack.CreateGaloisKeys(len(symCipherTexts))
@@ -76,6 +79,7 @@ func benchHEPastaPack(tc TestContext, b *testing.B) {
 
 	// encrypts symmetric master key using BFV on the client side
 	b.Run("PASTA/EncryptSymKey", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			hePastaPack.EncryptSymKey(tc.Key)
 		}
@@ -87,6 +91,7 @@ func benchHEPastaPack(tc TestContext, b *testing.B) {
 	// the server side tranciphering
 	var fvCiphers []*rlwe.Ciphertext
 	b.Run("PASTA/Trancipher", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			fvCiphers = hePastaPack.Trancipher(nonce, symCipherTexts)
 		}
@@ -94,6 +99,7 @@ func benchHEPastaPack(tc TestContext, b *testing.B) {
 
 	var ctRes *rlwe.Ciphertext
 	b.Run("PASTA/Flatten", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			ctRes = hePastaPack.Flatten(fvCiphers, len(symCipherTexts))
 		}
@@ -101,6 +107,7 @@ func benchHEPastaPack(tc TestContext, b *testing.B) {
 
 	//var ptRes HHESoK.Plaintext
 	b.Run("PASTA/Decrypt", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			_ = hePastaPack.Decrypt(ctRes)
 		}

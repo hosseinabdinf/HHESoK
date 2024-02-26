@@ -9,7 +9,7 @@ To test each symmetric cipher, navigate to its respective directory:
 
 Then execute the following commands:
 
-    $ go test
+    $  go test -run TestCNAME
 
 To obtain comprehensive benchmarking results, execute the following commands:
 
@@ -31,11 +31,11 @@ To test each HHE scheme, navigate to its respective directory:
 
 Then execute the following commands:
 
-    $ go test
+    $ go test -run TestCNAME -timeout=120m
 
 To obtain comprehensive benchmarking results, execute the following commands:
 
-    $ go test -bench=BenchmarkCNAME -benchtime=1x -timeout=20m -benchmem -run=^$
+    $ go test -bench=BenchmarkCNAME -benchtime=1x -timeout=120m -benchmem -run=^$
 
 Replace "CNAME" with the name of the desired cipher, for which a benchmark is
 available, from the following list:

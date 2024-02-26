@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -34,6 +35,7 @@ type Logger interface {
 	PrintMessage(message string)
 	PrintMessages(messages ...interface{})
 	PrintDataLen(data []uint64)
+	PrintMemUsage(name string)
 	HandleError(err error)
 }
 
@@ -42,7 +44,6 @@ func (l logger) PrintMessage(message string) {
 		fmt.Printf("\t--- %s\n", message)
 	}
 }
-
 func (l logger) PrintMessages(messages ...interface{}) {
 	if l.debug {
 		for _, message := range messages {
@@ -56,12 +57,25 @@ func (l logger) PrintDataLen(data []uint64) {
 		fmt.Printf("Len: %d, Data: %d \n", len(data), data)
 	}
 }
-
 func (l logger) HandleError(err error) {
 	if err != nil {
 		fmt.Printf("=== LOGGER Error: %s\n", err.Error())
 		panic("=== LOGGER Panic: \n ")
 	}
+}
+
+// PrintMemUsage outputs the current, total and OS memory being used. As well as the
+// number of garage collection cycles completed. For info on each,
+// see: https://golang.org/pkg/runtime/#MemStats
+func (l logger) PrintMemUsage(name string) {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	mb := 1e6
+	alloc := float64(m.Alloc) / mb
+	tAlloc := float64(m.TotalAlloc) / mb
+	mSys := float64(m.Sys) / mb
+	//numGC := m.NumGC
+	fmt.Printf(">> %s: \t\t %7.5f MB \t %7.5f MB \t %7.5f MB\n", name, alloc, tAlloc, mSys)
 }
 
 // SaveToFile save the given Plaintext as hexadecimal values to a file

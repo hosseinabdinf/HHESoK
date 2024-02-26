@@ -21,6 +21,7 @@ func TestHera(t *testing.T) {
 
 		t.Run("HeraEncryptionTest", func(t *testing.T) {
 			ciphertext = encryptor.Encrypt(tc.Plaintext)
+			logger.PrintMemUsage("HeraEncryptionTest")
 		})
 
 		t.Run("HeraDecryptionTest", func(t *testing.T) {
