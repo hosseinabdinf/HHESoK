@@ -111,7 +111,7 @@ func (pas *HEPastaPack) CreateGaloisKeys(dataSize int) {
 // RandomDataGen generates the matrix of random data
 // = [output size * number of block]
 func (pas *HEPastaPack) RandomDataGen() (data []uint64) {
-	size := pas.outSize * pas.N // make it equal as HERA and Rubato
+	size := 1 * pas.N // make it equal as HERA and Rubato
 	p := pas.symParams.GetModulus()
 	data = make([]uint64, size)
 	for i := 0; i < size; i++ {
@@ -131,11 +131,12 @@ func (pas *HEPastaPack) Trancipher(nonces []byte, dCt []uint64) []*rlwe.Cipherte
 }
 
 // Decrypt homomorphic ciphertext
-func (pas *HEPastaPack) Decrypt(ciphertexts *rlwe.Ciphertext) (res HHESoK.Plaintext) {
-	pt := pas.decryptor.DecryptNew(ciphertexts)
-	err := pas.encoder.Decode(pt, res)
+func (pas *HEPastaPack) Decrypt(ciphertext *rlwe.Ciphertext) (res []uint64) {
+	tmp := make([]uint64, ciphertext.Slots())
+	pt := pas.decryptor.DecryptNew(ciphertext)
+	err := pas.encoder.Decode(pt, tmp)
 	pas.logger.HandleError(err)
-	return res[:pas.N]
+	return tmp[:pas.N]
 }
 
 func (pas *HEPastaPack) Flatten(ciphers []*rlwe.Ciphertext, dataSize int) (res *rlwe.Ciphertext) {

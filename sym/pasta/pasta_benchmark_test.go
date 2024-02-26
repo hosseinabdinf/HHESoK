@@ -27,6 +27,7 @@ func benchmarkPasta(tc *TestContext, b *testing.B) {
 	var pastaCipher Pasta
 	var encryptor Encryptor
 	var newCiphertext HHESoK.Ciphertext
+
 	b.Run("Pasta/NewPasta", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			pastaCipher = NewPasta(tc.Key, tc.Params)

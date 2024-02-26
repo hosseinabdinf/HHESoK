@@ -35,14 +35,14 @@ Then execute the following commands:
 
 To obtain comprehensive benchmarking results, execute the following commands:
 
-    $ go test -bench=BenchmarkCNAME -benchtime=1x -benchmem -run=^$
+    $ go test -bench=BenchmarkCNAME -benchtime=1x -timeout=20m -benchmem -run=^$
 
 Replace "CNAME" with the name of the desired cipher, for which a benchmark is
 available, from the following list:
 
     Available CNAMES for Benchmarking:
-    - Pasta3:   PASTA cipher with 3 rounds
-    - Pasta4:   PASTA cipher with 4 rounds
-    - Hera:     HERA cipher
-    - Rubato:   Rubato cipher
+    - Pasta3Pack:   PASTA cipher with 3 rounds
+    - Pasta4Pack:   PASTA cipher with 4 rounds
+    - Hera:         HERA cipher
+    - Rubato:       Rubato cipher
 
