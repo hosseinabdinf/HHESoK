@@ -18,7 +18,7 @@ func BenchmarkPasta3Pack(b *testing.B) {
 	//}
 	// uncomment following line if you want to use manual test case
 	// you can choose test cased from [0-2]
-	benchHEPastaPack(pasta3TestVector[1], b)
+	benchHEPastaPack(pasta3TestVector[0], b)
 }
 
 func BenchmarkPasta4Pack(b *testing.B) {
