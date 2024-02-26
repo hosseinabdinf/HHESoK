@@ -75,7 +75,7 @@ func (l logger) PrintMemUsage(name string) {
 	tAlloc := float64(m.TotalAlloc) / mb
 	mSys := float64(m.Sys) / mb
 	//numGC := m.NumGC
-	fmt.Printf(">> %s: \t\t %7.5f MB \t %7.5f MB \t %7.5f MB\n", name, alloc, tAlloc, mSys)
+	fmt.Printf(">> %s: \t\t\t\t %7.5f MB \t %7.5f MB \t %7.5f MB\n", name, alloc, tAlloc, mSys)
 }
 
 // SaveToFile save the given Plaintext as hexadecimal values to a file
