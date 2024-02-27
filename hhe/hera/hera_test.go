@@ -1,7 +1,6 @@
 package hera
 
 import (
-	"HHESoK"
 	"HHESoK/rtf_ckks_integration/ckks_fv"
 	"HHESoK/sym/hera"
 	"fmt"
@@ -15,14 +14,12 @@ func testString(opName string, p hera.Parameter) string {
 }
 
 func TestHera(t *testing.T) {
-	logger := HHESoK.NewLogger(HHESoK.DEBUG)
 	for _, tc := range hera.TestVector {
 		// skip the test for 80-bit security
 		if tc.Params.Rounds == 4 {
 			continue
 		}
 		fmt.Println(testString("HERA", tc.Params))
-		logger.PrintDataLen(tc.Key)
 		testHEHera(t, tc)
 	}
 }
@@ -30,6 +27,7 @@ func TestHera(t *testing.T) {
 func testHEHera(t *testing.T, tc hera.TestContext) {
 	heHera := NewHEHera()
 	lg := heHera.logger
+	lg.PrintDataLen(tc.Key)
 
 	var data [][]float64
 	var nonces [][]byte

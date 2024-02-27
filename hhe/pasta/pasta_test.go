@@ -1,7 +1,6 @@
 package pasta
 
 import (
-	"HHESoK"
 	"HHESoK/sym/pasta"
 	"encoding/binary"
 	"fmt"
@@ -18,7 +17,6 @@ func TestPasta3(t *testing.T) {
 		fmt.Println(testString("PASTA-3", tc.SymParams))
 		testHEPasta(t, tc)
 	}
-
 	//testHEPasta(t, pasta3TestVector[0])
 }
 
@@ -27,31 +25,36 @@ func TestPasta4(t *testing.T) {
 		fmt.Println(testString("PASTA-4", tc.SymParams))
 		testHEPasta(t, tc)
 	}
-	//testHEPasta(t, pasta3TestVector[0])
+	//testHEPasta(t, pasta4TestVector[0])
 }
 
 func testHEPasta(t *testing.T, tc TestContext) {
-	logger := HHESoK.NewLogger(HHESoK.DEBUG)
-	logger.PrintDataLen(tc.Key)
-
 	hePasta := NewHEPasta()
+	lg := hePasta.logger
+	lg.PrintDataLen(tc.Key)
 
 	hePasta.InitParams(tc.Params, tc.SymParams)
 
 	hePasta.HEKeyGen()
+	lg.PrintMemUsage("HEKeyGen")
 
 	_ = hePasta.InitFvPasta()
+	lg.PrintMemUsage("InitFvPasta")
 
 	hePasta.CreateGaloisKeys(len(tc.ExpCipherText))
+	lg.PrintMemUsage("CreateGaloisKeys")
 
 	//encrypts symmetric master key using BFV on the client side
 	hePasta.EncryptSymKey(tc.Key)
+	lg.PrintMemUsage("EncryptSymKey")
 
 	nonce := make([]byte, 8)
 	binary.BigEndian.PutUint64(nonce, uint64(123456789))
 
 	// the server side
 	fvCiphers := hePasta.Trancipher(nonce, tc.ExpCipherText)
+	lg.PrintMemUsage("Trancipher")
 
 	hePasta.Decrypt(fvCiphers[0])
+	lg.PrintMemUsage("Decrypt")
 }

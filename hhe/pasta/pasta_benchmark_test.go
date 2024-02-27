@@ -9,11 +9,10 @@ import (
 )
 
 func BenchmarkPasta3(b *testing.B) {
-	// comment below loop if you want to go over each test case manually
-	// it helps to get benchmark results when there's memory limit in the
-	// test environment
+	// comment below loop if you want to go over each testcase manually
+	// it helps to get benchmark results when there's memory limit in
+	// your test environment
 	for _, tc := range pasta3TestVector {
-		fmt.Println(testString("PASTA-3", tc.SymParams))
 		benchHEPasta(tc, b)
 	}
 	// uncomment following line if you want to use manual test case
@@ -22,11 +21,10 @@ func BenchmarkPasta3(b *testing.B) {
 }
 
 func BenchmarkPasta4(b *testing.B) {
-	// comment below loop if you want to go over each test case manually
-	// it helps to get benchmark results when there's memory limit in the
-	// test environment
+	// comment below loop if you want to go over each testcase manually
+	// it helps to get benchmark results when there's memory limit in
+	// your test environment
 	for _, tc := range pasta4TestVector {
-		fmt.Println(testString("PASTA-4", tc.SymParams))
 		benchHEPasta(tc, b)
 	}
 	// uncomment following line if you want to use manual test case
@@ -35,6 +33,7 @@ func BenchmarkPasta4(b *testing.B) {
 }
 
 func benchHEPasta(tc TestContext, b *testing.B) {
+	fmt.Println(testString("PASTA", tc.SymParams))
 	if testing.Short() {
 		b.Skip("skipping benchmark in short mode.")
 	}
@@ -47,6 +46,7 @@ func benchHEPasta(tc TestContext, b *testing.B) {
 	hePasta.InitParams(tc.Params, tc.SymParams)
 
 	b.Run("PASTA/HEKeyGen", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			hePasta.HEKeyGen()
 		}
@@ -55,6 +55,7 @@ func benchHEPasta(tc TestContext, b *testing.B) {
 	_ = hePasta.InitFvPasta()
 
 	b.Run("PASTA/GaloisKeysGen", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			hePasta.CreateGaloisKeys(len(tc.ExpCipherText))
 		}
@@ -62,6 +63,7 @@ func benchHEPasta(tc TestContext, b *testing.B) {
 
 	//encrypts symmetric master key using BFV on the client side
 	b.Run("PASTA/EncryptSymKey", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			hePasta.EncryptSymKey(tc.Key)
 		}
@@ -73,12 +75,14 @@ func benchHEPasta(tc TestContext, b *testing.B) {
 	// the server side
 	var fvCiphers []*rlwe.Ciphertext
 	b.Run("PASTA/Trancipher", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			fvCiphers = hePasta.Trancipher(nonce, tc.ExpCipherText)
 		}
 	})
 
 	b.Run("PASTA/Decrypt", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			hePasta.Decrypt(fvCiphers[0])
 		}

@@ -9,9 +9,9 @@ import (
 )
 
 func BenchmarkRubato(b *testing.B) {
-	// comment below loop if you want to go over each test case manually
-	// it helps to get benchmark results when there's memory limit in the
-	// test environment
+	// comment below loop if you want to go over each testcase manually
+	// it helps to get benchmark results when there's memory limit in
+	// your test environment
 	for _, tc := range rubato.TestsVector {
 		benchHERubato(tc, b)
 	}
@@ -31,12 +31,14 @@ func benchHERubato(tc rubato.TestContext, b *testing.B) {
 	heRubato.InitParams(tc.FVParamIndex, tc.Params, len(tc.Plaintext))
 
 	b.Run("Rubato/HEKeyGen", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			heRubato.HEKeyGen()
 		}
 	})
 
 	b.Run("Rubato/HalfBootKeyGen", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			heRubato.HalfBootKeyGen()
 		}
@@ -62,6 +64,7 @@ func benchHERubato(tc rubato.TestContext, b *testing.B) {
 	keyStream := make([][]uint64, heRubato.N)
 
 	b.Run("Rubato/SymKeyStream", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			for i := 0; i < heRubato.N; i++ {
 				symRub := rubato.NewRubato(tc.Key, tc.Params)
@@ -73,7 +76,8 @@ func benchHERubato(tc rubato.TestContext, b *testing.B) {
 	// data to coefficients
 	heRubato.DataToCoefficients(data)
 
-	b.Run("PASTA/EncryptSymData", func(b *testing.B) {
+	b.Run("Rubato/EncryptSymData", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			heRubato.EncodeEncrypt(keyStream)
 		}
@@ -83,6 +87,7 @@ func benchHERubato(tc rubato.TestContext, b *testing.B) {
 
 	// FV Key Stream, encrypts symmetric key stream using BFV on the client side
 	b.Run("Rubato/EncSymKey", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			_ = heRubato.InitFvRubato()
 			heRubato.EncryptSymKey(tc.Key)
@@ -92,6 +97,7 @@ func benchHERubato(tc rubato.TestContext, b *testing.B) {
 	// get BFV key stream using encrypted symmetric key, nonce, and counter on the server side
 	var fvKeyStreams []*ckks_fv.Ciphertext
 	b.Run("Rubato/FVKeyStream", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			fvKeyStreams = heRubato.GetFvKeyStreams(nonces, counter)
 		}
@@ -101,6 +107,7 @@ func benchHERubato(tc rubato.TestContext, b *testing.B) {
 
 	// half bootstrapping
 	b.Run("Rubato/HalfBoot", func(b *testing.B) {
+		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			_ = heRubato.HalfBoot()
 		}

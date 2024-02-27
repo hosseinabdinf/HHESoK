@@ -10,33 +10,31 @@ import (
 )
 
 func BenchmarkPasta3Pack(b *testing.B) {
-	// comment below loop if you want to go over each test case manually
-	// it helps to get benchmark results when there's memory limit in the
-	// test environment
-	//for _, tc := range pasta3TestVector {
-	//	benchHEPastaPack(tc, b)
-	//}
+	// comment below loop if you want to go over each testcase manually
+	// it helps to get benchmark results when there's memory limit in
+	// your test environment
+	for _, tc := range pasta3TestVector {
+		benchHEPastaPack(tc, b)
+	}
 	// uncomment following line if you want to use manual test case
 	// you can choose test cased from [0-2]
-	benchHEPastaPack(pasta3TestVector[0], b)
+	// benchHEPastaPack(pasta3TestVector[0], b)
 }
 
 func BenchmarkPasta4Pack(b *testing.B) {
-	// comment below loop if you want to go over each test case manually
-	// it helps to get benchmark results when there's memory limit in the
-	// test environment
-	//for _, tc := range pasta4TestVector {
-	//	fmt.Println(testString("PASTA-4", tc.SymParams))
-	//	benchHEPastaPack(tc, b)
-	//}
+	// comment below loop if you want to go over each testcase manually
+	// it helps to get benchmark results when there's memory limit in
+	// your test environment
+	for _, tc := range pasta4TestVector {
+		benchHEPastaPack(tc, b)
+	}
 	// uncomment following line if you want to use manual test case
 	// you can choose test cased from [0-2]
-	benchHEPastaPack(pasta4TestVector[0], b)
+	// benchHEPastaPack(pasta4TestVector[0], b)
 }
 
 func benchHEPastaPack(tc TestContext, b *testing.B) {
 	fmt.Println(testString("PASTA", tc.SymParams))
-
 	if testing.Short() {
 		b.Skip("skipping benchmark in short mode.")
 	}

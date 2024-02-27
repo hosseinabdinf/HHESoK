@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/csv"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"runtime"
@@ -75,7 +76,43 @@ func (l logger) PrintMemUsage(name string) {
 	tAlloc := float64(m.TotalAlloc) / mb
 	mSys := float64(m.Sys) / mb
 	//numGC := m.NumGC
-	fmt.Printf(">> %s: \t\t\t\t %7.5f MB \t %7.5f MB \t %7.5f MB\n", name, alloc, tAlloc, mSys)
+	buf := new(strings.Builder)
+	width := 15 + 5
+	fmt.Fprintf(buf, ">> %-*s", width, name)
+	buf.WriteByte('\t')
+	prettyPrint(buf, alloc, "MB")
+	buf.WriteByte('\t')
+	prettyPrint(buf, tAlloc, "MB")
+	buf.WriteByte('\t')
+	prettyPrint(buf, mSys, "MB")
+	fmt.Println(buf)
+}
+
+func prettyPrint(w io.Writer, x float64, unit string) {
+	// Print all numbers with 10 places before the decimal point
+	// and small numbers with four sig figs. Field widths are
+	// chosen to fit the whole part in 10 places while aligning
+	// the decimal point of all fractional formats.
+	var format string
+	switch y := math.Abs(x); {
+	case y == 0 || y >= 999.95:
+		format = "%10.3f %s"
+	case y >= 99.995:
+		format = "%10.3f %s"
+	case y >= 9.9995:
+		format = "%10.3f %s"
+	case y >= 0.99995:
+		format = "%10.3f %s"
+	case y >= 0.099995:
+		format = "%15.4f %s"
+	case y >= 0.0099995:
+		format = "%16.5f %s"
+	case y >= 0.00099995:
+		format = "%17.6f %s"
+	default:
+		format = "%18.7f %s"
+	}
+	fmt.Fprintf(w, format, x, unit)
 }
 
 // SaveToFile save the given Plaintext as hexadecimal values to a file

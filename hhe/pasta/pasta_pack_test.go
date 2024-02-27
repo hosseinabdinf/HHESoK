@@ -1,7 +1,6 @@
 package pasta
 
 import (
-	"HHESoK"
 	"HHESoK/sym/pasta"
 	"encoding/binary"
 	"fmt"
@@ -13,7 +12,6 @@ func TestPasta3Pack(t *testing.T) {
 		fmt.Println(testString("PASTA-3", tc.SymParams))
 		testHEPastaPack(t, tc)
 	}
-
 	//testHEPastaPack(t, pasta3TestVector[0])
 }
 
@@ -22,53 +20,51 @@ func TestPasta4Pack(t *testing.T) {
 		fmt.Println(testString("PASTA-4", tc.SymParams))
 		testHEPastaPack(t, tc)
 	}
-
-	//testHEPastaPack(t, pasta3TestVector[0])
+	//testHEPastaPack(t, pasta4TestVector[0])
 }
 
 func testHEPastaPack(t *testing.T, tc TestContext) {
-	logger := HHESoK.NewLogger(HHESoK.DEBUG)
-	logger.PrintDataLen(tc.Key)
-
 	hePastaPack := NewHEPastaPack()
+	lg := hePastaPack.logger
+	lg.PrintDataLen(tc.Key)
 
-	fmt.Println("InitParams")
 	hePastaPack.InitParams(tc.Params, tc.SymParams)
 
-	fmt.Println("HEKeyGen")
 	hePastaPack.HEKeyGen()
+	lg.PrintMemUsage("HEKeyGen")
 
-	fmt.Println("InitFvPasta")
 	_ = hePastaPack.InitFvPasta()
+	lg.PrintMemUsage("InitFvPasta")
 
 	// generates Random data for full coefficients
-	fmt.Println("RandomDataGen")
 	data := hePastaPack.RandomDataGen()
+	lg.PrintMemUsage("RandomDataGen")
 
 	// generate key stream
-	fmt.Println("EncryptSymData")
 	symPasta := pasta.NewPasta(tc.Key, tc.SymParams)
-	symCipherTexts := symPasta.NewEncryptor().Encrypt(data)
+	symCiphertexts := symPasta.NewEncryptor().Encrypt(data)
+	lg.PrintMemUsage("EncryptSymData")
 
 	// create Galois keys for evaluation
-	fmt.Println("GaloisKeysGen")
-	hePastaPack.CreateGaloisKeys(len(symCipherTexts))
+	hePastaPack.CreateGaloisKeys(len(symCiphertexts))
+	lg.PrintMemUsage("CreateGaloisKeys")
 
 	// encrypts symmetric master key using BFV on the client side
-	fmt.Println("EncryptSymKey")
 	hePastaPack.EncryptSymKey(tc.Key)
+	lg.PrintMemUsage("EncryptSymKey")
 
 	nonce := make([]byte, 8)
 	binary.BigEndian.PutUint64(nonce, 123456789)
 
 	// the server side tranciphering
-	fmt.Println("Trancipher")
-	fvCiphers := hePastaPack.Trancipher(nonce, symCipherTexts)
+	fvCiphers := hePastaPack.Trancipher(nonce, symCiphertexts)
+	lg.PrintMemUsage("Trancipher")
 
-	fmt.Println("Flatten")
-	ctRes := hePastaPack.Flatten(fvCiphers, len(symCipherTexts))
+	ctRes := hePastaPack.Flatten(fvCiphers, len(symCiphertexts))
+	lg.PrintMemUsage("Flatten")
 
 	ptRes := hePastaPack.Decrypt(ctRes)
+	lg.PrintMemUsage("Decrypt")
 
 	hePastaPack.logger.PrintDataLen(data)
 	hePastaPack.logger.PrintDataLen(ptRes)

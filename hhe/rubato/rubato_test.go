@@ -1,7 +1,6 @@
 package rubato
 
 import (
-	"HHESoK"
 	ckks "HHESoK/rtf_ckks_integration/ckks_fv"
 	"HHESoK/sym/rubato"
 	"encoding/binary"
@@ -16,31 +15,37 @@ func testString(opName string, p rubato.Parameter) string {
 }
 
 func TestRubato(t *testing.T) {
-	logger := HHESoK.NewLogger(HHESoK.DEBUG)
 	for _, tc := range rubato.TestsVector {
 		fmt.Println(testString("Rubato", tc.Params))
-		logger.PrintDataLen(tc.Key)
 		testHERubato(t, tc)
 	}
 }
 
 func testHERubato(t *testing.T, tc rubato.TestContext) {
 	heRubato := NewHERubato()
+	lg := heRubato.logger
+	lg.PrintDataLen(tc.Key)
 
 	heRubato.InitParams(tc.FVParamIndex, tc.Params, len(tc.Plaintext))
 
 	heRubato.HEKeyGen()
+	lg.PrintMemUsage("HEKeyGen")
 
 	heRubato.HalfBootKeyGen()
+	lg.PrintMemUsage("HalfBootKeyGen")
 
 	heRubato.InitHalfBootstrapper()
+	lg.PrintMemUsage("InitHalfBootstrapper")
 
 	heRubato.InitEvaluator()
+	lg.PrintMemUsage("InitEvaluator")
 
 	heRubato.InitCoefficients()
+	lg.PrintMemUsage("InitCoefficients")
 
 	// use the plaintext data from test vector or generate Random ones for full coefficients
 	data := heRubato.RandomDataGen()
+	lg.PrintMemUsage("RandomDataGen")
 
 	// need an array of 8-byte nonce for each block of data
 	nonces := heRubato.NonceGen()
@@ -55,27 +60,36 @@ func testHERubato(t *testing.T, tc rubato.TestContext) {
 		binary.BigEndian.PutUint64(counter, uint64(i))
 		keyStream[i] = symRub.KeyStream(nonces[i], counter)
 	}
+	lg.PrintMemUsage("SymKeyStreamGen")
 
 	// data to coefficients
 	heRubato.DataToCoefficients(data)
+	lg.PrintMemUsage("DataToCoefficients")
 
 	// simulate the data encryption on client side and encode the result into polynomial representations
 	heRubato.EncodeEncrypt(keyStream)
+	lg.PrintMemUsage("EncodeEncrypt")
 
 	heRubato.ScaleUp()
+	lg.PrintMemUsage("ScaleUp")
 
 	_ = heRubato.InitFvRubato()
+	lg.PrintMemUsage("InitFvRubato")
 
 	// encrypts symmetric master key using BFV on the client side
 	heRubato.EncryptSymKey(tc.Key)
+	lg.PrintMemUsage("EncryptSymKey")
 
 	// get BFV key stream using encrypted symmetric key, nonce, and counter on the server side
 	fvKeyStreams := heRubato.GetFvKeyStreams(nonces, counter)
+	lg.PrintMemUsage("GetFvKeyStreams")
 
 	heRubato.ScaleCiphertext(fvKeyStreams)
+	lg.PrintMemUsage("ScaleCiphertext")
 
 	// half bootstrapping
 	ctBoot := heRubato.HalfBoot()
+	lg.PrintMemUsage("HalfBoot")
 
 	valuesWant := make([]complex128, heRubato.params.Slots())
 	for i := 0; i < heRubato.params.Slots(); i++ {
