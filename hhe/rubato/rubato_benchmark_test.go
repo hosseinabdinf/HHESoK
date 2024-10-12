@@ -12,12 +12,12 @@ func BenchmarkRubato(b *testing.B) {
 	// comment below loop if you want to go over each testcase manually
 	// it helps to get benchmark results when there's memory limit in
 	// your test environment
-	for _, tc := range rubato.TestsVector {
-		benchHERubato(tc, b)
-	}
+	// for _, tc := range rubato.TestsVector {
+	// benchHERubato(tc, b)
+	// }
 	// uncomment following line if you want to use manual test case
 	// you can choose test cased from [0-2]
-	// benchHERubato(rubato.TestsVector[2], b)
+	benchHERubato(rubato.TestsVector[2], b)
 }
 
 func benchHERubato(tc rubato.TestContext, b *testing.B) {

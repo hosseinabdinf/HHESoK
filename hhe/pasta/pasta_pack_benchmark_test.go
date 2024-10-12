@@ -5,7 +5,7 @@ import (
 	"HHESoK/sym/pasta"
 	"encoding/binary"
 	"fmt"
-	"github.com/tuneinsight/lattigo/v5/core/rlwe"
+	"github.com/tuneinsight/lattigo/v6/core/rlwe"
 	"testing"
 )
 
@@ -88,7 +88,7 @@ func benchHEPastaPack(tc TestContext, b *testing.B) {
 
 	// the server side tranciphering
 	var fvCiphers []*rlwe.Ciphertext
-	b.Run("PASTA/Trancipher", func(b *testing.B) {
+	b.Run("PASTA/Transcipher", func(b *testing.B) {
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			fvCiphers = hePastaPack.Trancipher(nonce, symCipherTexts)

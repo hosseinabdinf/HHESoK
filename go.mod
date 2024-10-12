@@ -1,6 +1,8 @@
 module HHESoK
 
-go 1.20
+go 1.22.0
+
+toolchain go1.22.4
 
 //replace (
 //	HHESoK/rtf_ckks_integration/ => ./rtf_ckks_integration/
@@ -8,8 +10,8 @@ go 1.20
 
 require (
 	github.com/stretchr/testify v1.9.0
-	github.com/tuneinsight/lattigo/v5 v5.0.2
-	golang.org/x/crypto v0.24.0
+	github.com/tuneinsight/lattigo/v6 v6.0.0
+	golang.org/x/crypto v0.28.0
 )
 
 require (
@@ -18,7 +20,7 @@ require (
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/exp v0.0.0-20240604190554-fc45aab8b7f8 // indirect
-	golang.org/x/sys v0.21.0 // indirect
+	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c // indirect
+	golang.org/x/sys v0.26.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

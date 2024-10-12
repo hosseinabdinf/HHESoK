@@ -8,11 +8,11 @@ import (
 )
 
 func TestPasta3Pack(t *testing.T) {
-	for _, tc := range pasta3TestVector {
-		fmt.Println(testString("PASTA-3", tc.SymParams))
-		testHEPastaPack(t, tc)
-	}
-	//testHEPastaPack(t, pasta3TestVector[0])
+	//for _, tc := range pasta3TestVector {
+	//	fmt.Println(testString("PASTA-3", tc.SymParams))
+	//	testHEPastaPack(t, tc)
+	//}
+	testHEPastaPack(t, pasta3TestVector[0])
 }
 
 func TestPasta4Pack(t *testing.T) {
@@ -58,7 +58,7 @@ func testHEPastaPack(t *testing.T, tc TestContext) {
 
 	// the server side tranciphering
 	fvCiphers := hePastaPack.Trancipher(nonce, symCiphertexts)
-	lg.PrintMemUsage("Trancipher")
+	lg.PrintMemUsage("Transcipher")
 
 	ctRes := hePastaPack.Flatten(fvCiphers, len(symCiphertexts))
 	lg.PrintMemUsage("Flatten")

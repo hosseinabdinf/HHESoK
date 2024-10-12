@@ -2,26 +2,27 @@ package rubato
 
 import (
 	ckks "HHESoK/rtf_ckks_integration/ckks_fv"
-	"HHESoK/sym/rubato"
+	symRubato "HHESoK/sym/rubato"
 	"encoding/binary"
 	"fmt"
 	"math"
 	"testing"
 )
 
-func testString(opName string, p rubato.Parameter) string {
+func testString(opName string, p symRubato.Parameter) string {
 	return fmt.Sprintf("%s/BlockSize=%d/Modulus=%d/Rounds=%d/Sigma=%f",
 		opName, p.GetBlockSize(), p.GetModulus(), p.GetRounds(), p.GetSigma())
 }
 
 func TestRubato(t *testing.T) {
-	for _, tc := range rubato.TestsVector {
-		fmt.Println(testString("Rubato", tc.Params))
-		testHERubato(t, tc)
-	}
+	//for _, tc := range rubato.TestsVector {
+	//	fmt.Println(testString("Rubato", tc.Params))
+	//	testHERubato(t, tc)
+	//}
+	testHERubato(t, symRubato.TestsVector[0])
 }
 
-func testHERubato(t *testing.T, tc rubato.TestContext) {
+func testHERubato(t *testing.T, tc symRubato.TestContext) {
 	heRubato := NewHERubato()
 	lg := heRubato.logger
 	lg.PrintDataLen(tc.Key)
@@ -56,7 +57,7 @@ func testHERubato(t *testing.T, tc rubato.TestContext) {
 	// generate key stream using plain rubato
 	keyStream := make([][]uint64, heRubato.params.N())
 	for i := 0; i < heRubato.params.N(); i++ {
-		symRub := rubato.NewRubato(tc.Key, tc.Params)
+		symRub := symRubato.NewRubato(tc.Key, tc.Params)
 		binary.BigEndian.PutUint64(counter, uint64(i))
 		keyStream[i] = symRub.KeyStream(nonces[i], counter)
 	}

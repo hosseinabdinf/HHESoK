@@ -4,8 +4,8 @@ import (
 	"HHESoK"
 	"HHESoK/sym/pasta"
 	"encoding/binary"
-	"github.com/tuneinsight/lattigo/v5/core/rlwe"
-	"github.com/tuneinsight/lattigo/v5/schemes/bfv"
+	"github.com/tuneinsight/lattigo/v6/core/rlwe"
+	"github.com/tuneinsight/lattigo/v6/schemes/bgv"
 	"golang.org/x/crypto/sha3"
 	"math"
 	"math/big"
@@ -15,7 +15,7 @@ type MFVPasta interface {
 	Crypt(nonce []byte, kCt *rlwe.Ciphertext, dCt HHESoK.Ciphertext) (res []*rlwe.Ciphertext)
 	EncKey(key []uint64) (res *rlwe.Ciphertext)
 	GetGaloisElements(dataSize int) []uint64
-	UpdateEvaluator(evaluator *bfv.Evaluator)
+	UpdateEvaluator(evaluator *bgv.Evaluator)
 }
 
 type mfvPasta struct {
@@ -42,16 +42,16 @@ type mfvPasta struct {
 	bsGsN2    uint64
 	gkIndices []int
 
-	bfvParams bfv.Parameters
-	encoder   *bfv.Encoder
-	evaluator *bfv.Evaluator
+	bfvParams bgv.Parameters
+	encoder   *bgv.Encoder
+	evaluator *bgv.Evaluator
 	encryptor *rlwe.Encryptor
 
 	rcPt *rlwe.Plaintext
 	rc   []uint64
 }
 
-func NEWMFVPasta(params Parameter, fvParams bfv.Parameters, symParams pasta.Parameter, encoder *bfv.Encoder, encryptor *rlwe.Encryptor, evaluator *bfv.Evaluator) MFVPasta {
+func NEWMFVPasta(params Parameter, fvParams bgv.Parameters, symParams pasta.Parameter, encoder *bgv.Encoder, encryptor *rlwe.Encryptor, evaluator *bgv.Evaluator) MFVPasta {
 	fvPasta := new(mfvPasta)
 	fvPasta.logger = HHESoK.NewLogger(HHESoK.DEBUG)
 
@@ -151,7 +151,7 @@ func (pas *mfvPasta) Crypt(nonce []byte, kCt *rlwe.Ciphertext, dCt HHESoK.Cipher
 		var sIndex = b * pas.plainSize
 		var eIndex = int(math.Min(float64((b+1)*pas.plainSize), float64(size)))
 		symCt := dCt[sIndex:eIndex]
-		plaintext := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+		plaintext := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 		_ = pas.encoder.Encode(symCt, plaintext)
 		// negate state --> state = state * -1
 		pas.state, _ = pas.evaluator.MulNew(pas.state, -1)
@@ -170,7 +170,7 @@ func (pas *mfvPasta) EncKey(key []uint64) (res *rlwe.Ciphertext) {
 		dupKey[i+pas.halfSlots] = key[i+pas.plainSize]
 	}
 
-	pKey := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+	pKey := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 	err := pas.encoder.Encode(dupKey, pKey)
 	pas.logger.HandleError(err)
 
@@ -193,7 +193,7 @@ func (pas *mfvPasta) GetGaloisElements(dataSize int) []uint64 {
 	return galEls
 }
 
-func (pas *mfvPasta) UpdateEvaluator(evaluator *bfv.Evaluator) {
+func (pas *mfvPasta) UpdateEvaluator(evaluator *bgv.Evaluator) {
 	pas.evaluator = evaluator
 }
 
@@ -259,7 +259,7 @@ func (pas *mfvPasta) addDiagonalIndices(size int) {
 // ///////////////////////		PASTA's homomorphic functions		///////////////////////
 // addRC add round constant to the state
 func (pas *mfvPasta) addRC() {
-	pas.rcPt = bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+	pas.rcPt = bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 	err := pas.encoder.Encode(pas.rc, pas.rcPt)
 	pas.logger.HandleError(err)
 	err = pas.evaluator.Add(pas.state, pas.rcPt, pas.state)
@@ -290,7 +290,7 @@ func (pas *mfvPasta) sBoxFeistel() {
 	for i := pas.plainSize; i < pas.halfSlots; i++ {
 		masks[i] = 0
 	}
-	maskPlaintext := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+	maskPlaintext := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 	err = pas.encoder.Encode(masks, maskPlaintext)
 	pas.logger.HandleError(err)
 	// stateRot = stateRot * mask
@@ -366,7 +366,7 @@ func (pas *mfvPasta) babyStepGiantStep() {
 			diag[j] = tmp[j-pas.halfSlots]
 		}
 
-		row := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+		row := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 		err = pas.encoder.Encode(diag, row)
 		pas.logger.HandleError(err)
 		matrix[i] = row
@@ -434,7 +434,7 @@ func (pas *mfvPasta) diagonal() {
 			diag[j+pas.halfSlots] = pas.mat2[j][(j+matrixDim-i)%matrixDim]
 		}
 
-		row := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+		row := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 		err = pas.encoder.Encode(diag, row)
 		pas.logger.HandleError(err)
 		matrix[i] = row

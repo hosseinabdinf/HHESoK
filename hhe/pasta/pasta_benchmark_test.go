@@ -4,7 +4,7 @@ import (
 	"HHESoK"
 	"encoding/binary"
 	"fmt"
-	"github.com/tuneinsight/lattigo/v5/core/rlwe"
+	"github.com/tuneinsight/lattigo/v6/core/rlwe"
 	"testing"
 )
 
@@ -74,10 +74,10 @@ func benchHEPasta(tc TestContext, b *testing.B) {
 
 	// the server side
 	var fvCiphers []*rlwe.Ciphertext
-	b.Run("PASTA/Trancipher", func(b *testing.B) {
+	b.Run("PASTA/Transcipher", func(b *testing.B) {
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			fvCiphers = hePasta.Trancipher(nonce, tc.ExpCipherText)
+			fvCiphers = hePasta.Transcipher(nonce, tc.ExpCipherText)
 		}
 	})
 

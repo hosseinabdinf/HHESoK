@@ -20,6 +20,7 @@ type Ciphertext []uint64
 type Matrix [][]uint64
 type SBox []uint64
 
+// DEBUG for turning debug logs on/off
 const DEBUG = false
 
 type logger struct {

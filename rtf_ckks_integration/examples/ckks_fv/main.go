@@ -477,10 +477,10 @@ func testFVRubato(rubatoParam int) {
 	var keystream [][]uint64
 	var keystreamCt []*ckks_fv.Ciphertext
 
-	blocksize := ckks_fv.RubatoParams[rubatoParam].Blocksize
-	numRound := ckks_fv.RubatoParams[rubatoParam].NumRound
-	plainModulus := ckks_fv.RubatoParams[rubatoParam].PlainModulus
-	sigma := ckks_fv.RubatoParams[rubatoParam].Sigma
+	blocksize := rubato.RubatoParams[rubatoParam].Blocksize
+	numRound := rubato.RubatoParams[rubatoParam].NumRound
+	plainModulus := rubato.RubatoParams[rubatoParam].PlainModulus
+	sigma := rubato.RubatoParams[rubatoParam].Sigma
 
 	hbtpParams := ckks_fv.RtFRubatoParams[0]
 	params, err := hbtpParams.Params()
@@ -530,7 +530,7 @@ func testFVRubato(rubatoParam int) {
 
 	// Evaluate the Rubato keystream
 	fmt.Println("Evaluating HE keystream...")
-	rubato = ckks_fv.NewMFVRubato(rubatoParam, params, fvEncoder, fvEncryptor, fvEvaluator, 0)
+	rubato = rubato.NewMFVRubato(rubatoParam, params, fvEncoder, fvEncryptor, fvEvaluator, 0)
 	hekey := rubato.EncKey(key)
 	budget := fvNoiseEstimator.InvariantNoiseBudget(hekey[0])
 	fmt.Printf("Initial noise budget: %d\n", budget)
@@ -573,10 +573,10 @@ func testRtFRubatoModDown(rubatoParam int, paramIndex int, radix int, fullCoeffs
 	var stcModDown []int
 
 	// Rubato parameter
-	blocksize := ckks_fv.RubatoParams[rubatoParam].Blocksize
-	numRound := ckks_fv.RubatoParams[rubatoParam].NumRound
-	plainModulus := ckks_fv.RubatoParams[rubatoParam].PlainModulus
-	sigma := ckks_fv.RubatoParams[rubatoParam].Sigma
+	blocksize := rubato.RubatoParams[rubatoParam].Blocksize
+	numRound := rubato.RubatoParams[rubatoParam].NumRound
+	plainModulus := rubato.RubatoParams[rubatoParam].PlainModulus
+	sigma := rubato.RubatoParams[rubatoParam].Sigma
 
 	// RtF parameters
 	// Four sets of parameters (index 0 to 3) ensuring 128 bit of security
@@ -730,7 +730,7 @@ func testRtFRubatoModDown(rubatoParam int, paramIndex int, radix int, fullCoeffs
 		fvEncoder.FVScaleUp(plainCKKSRingTs[s], plaintexts[s])
 	}
 
-	rubato = ckks_fv.NewMFVRubato(rubatoParam, params, fvEncoder, fvEncryptor, fvEvaluator, rubatoModDown[0])
+	rubato = rubato.NewMFVRubato(rubatoParam, params, fvEncoder, fvEncryptor, fvEvaluator, rubatoModDown[0])
 	kCt := rubato.EncKey(key)
 
 	// FV Keystream
@@ -810,9 +810,9 @@ func findRubatoModDown(rubatoParam int, radix int) {
 	var stcModDown []int
 
 	// Rubato parameter
-	blocksize := ckks_fv.RubatoParams[rubatoParam].Blocksize
-	numRound := ckks_fv.RubatoParams[rubatoParam].NumRound
-	plainModulus := ckks_fv.RubatoParams[rubatoParam].PlainModulus
+	blocksize := rubato.RubatoParams[rubatoParam].Blocksize
+	numRound := rubato.RubatoParams[rubatoParam].NumRound
+	plainModulus := rubato.RubatoParams[rubatoParam].PlainModulus
 
 	// RtF Rubato parameters
 	// Four sets of parameters (index 0 to 1) ensuring 128 bit of security
@@ -868,7 +868,7 @@ func findRubatoModDown(rubatoParam int, radix int) {
 
 	// Find proper nbInitModDown value for fvHera
 	fmt.Println("=========== Start to find nbInitModDown ===========")
-	rubato = ckks_fv.NewMFVRubato(rubatoParam, params, fvEncoder, fvEncryptor, fvEvaluator, 0)
+	rubato = rubato.NewMFVRubato(rubatoParam, params, fvEncoder, fvEncryptor, fvEvaluator, 0)
 	heKey := rubato.EncKey(key)
 	stCt = rubato.CryptNoModSwitch(nonces, counter, heKey)
 
@@ -914,7 +914,7 @@ func findRubatoModDown(rubatoParam int, radix int) {
 	fmt.Printf("Preferred nbInitModDown = %d\n\n", nbInitModDown)
 
 	fmt.Println("=========== Start to find RubatoModDown & StcModDown ===========")
-	rubato = ckks_fv.NewMFVRubato(rubatoParam, params, fvEncoder, fvEncryptor, fvEvaluator, nbInitModDown)
+	rubato = rubato.NewMFVRubato(rubatoParam, params, fvEncoder, fvEncryptor, fvEvaluator, nbInitModDown)
 	heKey = rubato.EncKey(key)
 	stCt, rubatoModDown = rubato.CryptAutoModSwitch(nonces, counter, heKey, fvNoiseEstimator)
 	_, stcModDown = fvEvaluator.SlotsToCoeffsAutoModSwitch(stCt[0], fvNoiseEstimator)

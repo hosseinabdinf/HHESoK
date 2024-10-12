@@ -5,8 +5,8 @@ import (
 	"HHESoK/rtf_ckks_integration/utils"
 	"HHESoK/sym/pasta"
 	"fmt"
-	"github.com/tuneinsight/lattigo/v5/core/rlwe"
-	"github.com/tuneinsight/lattigo/v5/schemes/bfv"
+	"github.com/tuneinsight/lattigo/v6/core/rlwe"
+	"github.com/tuneinsight/lattigo/v6/schemes/bgv"
 )
 
 type HEPastaPack struct {
@@ -15,9 +15,9 @@ type HEPastaPack struct {
 
 	params    Parameter
 	symParams pasta.Parameter
-	bfvParams bfv.Parameters
-	encoder   *bfv.Encoder
-	evaluator *bfv.Evaluator
+	bfvParams bgv.Parameters
+	encoder   *bgv.Encoder
+	evaluator *bgv.Evaluator
 	encryptor *rlwe.Encryptor
 	decryptor *rlwe.Decryptor
 
@@ -40,7 +40,7 @@ func NewHEPastaPack() *HEPastaPack {
 		params:       Parameter{},
 		symParams:    pasta.Parameter{},
 		fvPasta:      nil,
-		bfvParams:    bfv.Parameters{},
+		bfvParams:    bgv.Parameters{},
 		encoder:      nil,
 		evaluator:    nil,
 		encryptor:    nil,
@@ -64,7 +64,7 @@ func (pas *HEPastaPack) InitParams(params Parameter, symParams pasta.Parameter) 
 	pas.outSize = 16
 	pas.N = 1 << params.logN
 	// create bfvParams from Literal
-	fvParams, err := bfv.NewParametersFromLiteral(bfv.ParametersLiteral{
+	fvParams, err := bgv.NewParametersFromLiteral(bgv.ParametersLiteral{
 		LogN:             params.logN,
 		LogQ:             []int{60, 59, 59, 57, 57, 55, 55, 53, 53, 51, 51, 47, 47},
 		LogP:             []int{57, 57, 55, 55, 53, 53, 51, 51, 47, 47},
@@ -80,22 +80,15 @@ func (pas *HEPastaPack) HEKeyGen() {
 	pas.keyGenerator = rlwe.NewKeyGenerator(params)
 	pas.sk, pas.pk = pas.keyGenerator.GenKeyPairNew()
 
-	pas.encoder = bfv.NewEncoder(params)
-	pas.decryptor = bfv.NewDecryptor(params, pas.sk)
-	pas.encryptor = bfv.NewEncryptor(params, pas.pk)
+	pas.encoder = bgv.NewEncoder(params)
+	pas.decryptor = bgv.NewDecryptor(params, pas.sk)
+	pas.encryptor = bgv.NewEncryptor(params, pas.pk)
 
-	fmt.Printf("=== Parameters : N=%d, T=%d, LogQP = %f, sigma = %T %v, logMaxSlot= %d \n",
-		1<<params.LogN(), params.PlaintextModulus(), params.LogQP(), params.Xe(), params.Xe(), params.LogMaxSlots())
+	fmt.Printf("=== Parameters : N=%d, T=%d, LogQP = %f, sigma = %T %v, logMaxSlot= %d \n", 1<<params.LogN(), params.PlaintextModulus(), params.LogQP(), params.Xe(), params.Xe(), params.LogMaxSlots())
 }
 
 func (pas *HEPastaPack) InitFvPasta() MFVPastaPack {
-	pas.fvPasta = NEWMFVPastaPack(
-		pas.params,
-		pas.bfvParams,
-		pas.symParams,
-		pas.encoder,
-		pas.encryptor,
-		pas.evaluator)
+	pas.fvPasta = NEWMFVPastaPack(pas.params, pas.bfvParams, pas.symParams, pas.encoder, pas.encryptor, pas.evaluator)
 	return pas.fvPasta
 }
 
@@ -104,7 +97,7 @@ func (pas *HEPastaPack) CreateGaloisKeys(dataSize int) {
 	galEls := pas.fvPasta.GetGaloisElements(dataSize)
 	pas.glk = pas.keyGenerator.GenGaloisKeysNew(galEls, pas.sk)
 	pas.evk = rlwe.NewMemEvaluationKeySet(pas.rlk, pas.glk...)
-	pas.evaluator = bfv.NewEvaluator(pas.bfvParams, pas.evk)
+	pas.evaluator = bgv.NewEvaluator(pas.bfvParams, pas.evk)
 	pas.fvPasta.UpdateEvaluator(pas.evaluator)
 }
 

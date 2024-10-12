@@ -4,7 +4,7 @@ import (
 	"HHESoK"
 	ckks "HHESoK/rtf_ckks_integration/ckks_fv"
 	"HHESoK/rtf_ckks_integration/utils"
-	"HHESoK/sym/rubato"
+	symRubato "HHESoK/sym/rubato"
 	"crypto/rand"
 	"math"
 )
@@ -13,7 +13,7 @@ type HERubato struct {
 	logger          HHESoK.Logger
 	paramIndex      int
 	params          *ckks.Parameters
-	symParams       rubato.Parameter
+	symParams       symRubato.Parameter
 	hbtp            *ckks.HalfBootstrapper
 	hbtpParams      *ckks.HalfBootParameters
 	keyGenerator    ckks.KeyGenerator
@@ -48,7 +48,7 @@ func NewHERubato() *HERubato {
 		logger:          HHESoK.NewLogger(HHESoK.DEBUG),
 		paramIndex:      0,
 		params:          nil,
-		symParams:       rubato.Parameter{},
+		symParams:       symRubato.Parameter{},
 		hbtp:            nil,
 		hbtpParams:      nil,
 		keyGenerator:    nil,
@@ -78,7 +78,7 @@ func NewHERubato() *HERubato {
 	return rubato
 }
 
-func (hR *HERubato) InitParams(paramIndex int, symParams rubato.Parameter, plainSize int) {
+func (hR *HERubato) InitParams(paramIndex int, symParams symRubato.Parameter, plainSize int) {
 	var err error
 	hR.paramIndex = paramIndex
 	hR.symParams = symParams

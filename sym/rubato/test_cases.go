@@ -2,7 +2,7 @@ package rubato
 
 import (
 	"HHESoK"
-	"HHESoK/rtf_ckks_integration/ckks_fv"
+	rubato2 "HHESoK/rtf_ckks_integration/ckks_fv"
 )
 
 type TestCase int
@@ -25,12 +25,12 @@ type TestContext struct {
 var TestsVector = []TestContext{
 	{
 		Tc:           ENC,
-		FVParamIndex: ckks_fv.RUBATO128S,
+		FVParamIndex: rubato2.RUBATO128S,
 		Params: Parameter{
-			BlockSize: ckks_fv.RubatoParams[ckks_fv.RUBATO128S].Blocksize,
-			Modulus:   ckks_fv.RubatoParams[ckks_fv.RUBATO128S].PlainModulus,
-			Rounds:    ckks_fv.RubatoParams[ckks_fv.RUBATO128S].NumRound,
-			Sigma:     ckks_fv.RubatoParams[ckks_fv.RUBATO128S].Sigma,
+			BlockSize: rubato2.RubatoParams[rubato2.RUBATO128S].Blocksize,
+			Modulus:   rubato2.RubatoParams[rubato2.RUBATO128S].PlainModulus,
+			Rounds:    rubato2.RubatoParams[rubato2.RUBATO128S].NumRound,
+			Sigma:     rubato2.RubatoParams[rubato2.RUBATO128S].Sigma,
 		},
 		Key: HHESoK.Key{
 			0x2b5ec16, 0x233b07d, 0x31e09fd, 0x36de34e,
@@ -74,12 +74,12 @@ var TestsVector = []TestContext{
 	},
 	{
 		Tc:           ENC,
-		FVParamIndex: ckks_fv.RUBATO128M,
+		FVParamIndex: rubato2.RUBATO128M,
 		Params: Parameter{
-			BlockSize: ckks_fv.RubatoParams[ckks_fv.RUBATO128M].Blocksize,
-			Modulus:   ckks_fv.RubatoParams[ckks_fv.RUBATO128M].PlainModulus,
-			Rounds:    ckks_fv.RubatoParams[ckks_fv.RUBATO128M].NumRound,
-			Sigma:     ckks_fv.RubatoParams[ckks_fv.RUBATO128M].Sigma,
+			BlockSize: rubato2.RubatoParams[rubato2.RUBATO128M].Blocksize,
+			Modulus:   rubato2.RubatoParams[rubato2.RUBATO128M].PlainModulus,
+			Rounds:    rubato2.RubatoParams[rubato2.RUBATO128M].NumRound,
+			Sigma:     rubato2.RubatoParams[rubato2.RUBATO128M].Sigma,
 		},
 		Key: HHESoK.Key{
 			0x12f820e, 0x806b8a, 0xaa0aff, 0x1b50b33,
@@ -128,12 +128,12 @@ var TestsVector = []TestContext{
 	},
 	{
 		Tc:           ENC,
-		FVParamIndex: ckks_fv.RUBATO128L,
+		FVParamIndex: rubato2.RUBATO128L,
 		Params: Parameter{
-			BlockSize: ckks_fv.RubatoParams[ckks_fv.RUBATO128L].Blocksize,
-			Modulus:   ckks_fv.RubatoParams[ckks_fv.RUBATO128L].PlainModulus,
-			Rounds:    ckks_fv.RubatoParams[ckks_fv.RUBATO128L].NumRound,
-			Sigma:     ckks_fv.RubatoParams[ckks_fv.RUBATO128L].Sigma,
+			BlockSize: rubato2.RubatoParams[rubato2.RUBATO128L].Blocksize,
+			Modulus:   rubato2.RubatoParams[rubato2.RUBATO128L].PlainModulus,
+			Rounds:    rubato2.RubatoParams[rubato2.RUBATO128L].NumRound,
+			Sigma:     rubato2.RubatoParams[rubato2.RUBATO128L].Sigma,
 		},
 		Key: HHESoK.Key{
 			0x133d8ba, 0xb78d11, 0x4d5ffa, 0x5a6ebf,

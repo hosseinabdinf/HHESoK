@@ -4,8 +4,8 @@ import (
 	"HHESoK"
 	"HHESoK/sym/pasta"
 	"encoding/binary"
-	"github.com/tuneinsight/lattigo/v5/core/rlwe"
-	"github.com/tuneinsight/lattigo/v5/schemes/bfv"
+	"github.com/tuneinsight/lattigo/v6/core/rlwe"
+	"github.com/tuneinsight/lattigo/v6/schemes/bgv"
 	"golang.org/x/crypto/sha3"
 	"math"
 	"math/big"
@@ -15,7 +15,7 @@ type MFVPastaPack interface {
 	Crypt(nonce []byte, kCt *rlwe.Ciphertext, dCt []uint64) (res []*rlwe.Ciphertext)
 	EncKey(key []uint64) (res *rlwe.Ciphertext)
 	GetGaloisElements(dataSize int) []uint64
-	UpdateEvaluator(evaluator *bfv.Evaluator)
+	UpdateEvaluator(evaluator *bgv.Evaluator)
 	Flatten(ciphers []*rlwe.Ciphertext) (cipher *rlwe.Ciphertext)
 	Mask(cipher *rlwe.Ciphertext, mask []uint64)
 }
@@ -45,9 +45,9 @@ type mfvPastaPack struct {
 	bsGsN2    uint64
 	gkIndices []int
 
-	bfvParams bfv.Parameters
-	encoder   *bfv.Encoder
-	evaluator *bfv.Evaluator
+	bfvParams bgv.Parameters
+	encoder   *bgv.Encoder
+	evaluator *bgv.Evaluator
 	encryptor *rlwe.Encryptor
 
 	rcPt *rlwe.Plaintext
@@ -57,7 +57,7 @@ type mfvPastaPack struct {
 	mask []uint64
 }
 
-func NEWMFVPastaPack(params Parameter, fvParams bfv.Parameters, symParams pasta.Parameter, encoder *bfv.Encoder, encryptor *rlwe.Encryptor, evaluator *bfv.Evaluator) MFVPastaPack {
+func NEWMFVPastaPack(params Parameter, fvParams bgv.Parameters, symParams pasta.Parameter, encoder *bgv.Encoder, encryptor *rlwe.Encryptor, evaluator *bgv.Evaluator) MFVPastaPack {
 	fvPastaPack := new(mfvPastaPack)
 	fvPastaPack.logger = HHESoK.NewLogger(HHESoK.DEBUG)
 
@@ -157,7 +157,7 @@ func (pas *mfvPastaPack) Crypt(nonce []byte, kCt *rlwe.Ciphertext, dCt []uint64)
 		var sIndex = b * pas.plainSize
 		var eIndex = int(math.Min(float64((b+1)*pas.plainSize), float64(size)))
 		cTmp := dCt[sIndex:eIndex]
-		plaintext := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+		plaintext := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 		_ = pas.encoder.Encode(cTmp, plaintext)
 		// negate state --> state = state * -1
 		pas.state, _ = pas.evaluator.MulNew(pas.state, -1)
@@ -175,7 +175,7 @@ func (pas *mfvPastaPack) EncKey(key []uint64) (res *rlwe.Ciphertext) {
 		dupKey[i+pas.halfSlots] = key[i+pas.plainSize]
 	}
 
-	pKey := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+	pKey := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 	err := pas.encoder.Encode(dupKey, pKey)
 	pas.logger.HandleError(err)
 
@@ -198,7 +198,7 @@ func (pas *mfvPastaPack) GetGaloisElements(dataSize int) []uint64 {
 	return galEls
 }
 
-func (pas *mfvPastaPack) UpdateEvaluator(evaluator *bfv.Evaluator) {
+func (pas *mfvPastaPack) UpdateEvaluator(evaluator *bgv.Evaluator) {
 	pas.evaluator = evaluator
 }
 
@@ -220,7 +220,7 @@ func (pas *mfvPastaPack) Flatten(ciphers []*rlwe.Ciphertext) (cipher *rlwe.Ciphe
 
 func (pas *mfvPastaPack) Mask(cipher *rlwe.Ciphertext, mask []uint64) {
 	var err error
-	plaintext := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+	plaintext := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 
 	err = pas.encoder.Encode(mask, plaintext)
 	pas.logger.HandleError(err)
@@ -233,7 +233,7 @@ func (pas *mfvPastaPack) Mask(cipher *rlwe.Ciphertext, mask []uint64) {
 
 // addRC add round constant to the state
 func (pas *mfvPastaPack) addRC() {
-	pas.rcPt = bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+	pas.rcPt = bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 	err := pas.encoder.Encode(pas.rc, pas.rcPt)
 	pas.logger.HandleError(err)
 	err = pas.evaluator.Add(pas.state, pas.rcPt, pas.state)
@@ -264,7 +264,7 @@ func (pas *mfvPastaPack) sBoxFeistel() {
 	for i := pas.plainSize; i < pas.halfSlots; i++ {
 		masks[i] = 0
 	}
-	maskPlaintext := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+	maskPlaintext := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 	err = pas.encoder.Encode(masks, maskPlaintext)
 	pas.logger.HandleError(err)
 	// stateRot = stateRot * mask
@@ -340,7 +340,7 @@ func (pas *mfvPastaPack) babyStepGiantStep() {
 			diag[j] = tmp[j-pas.halfSlots]
 		}
 
-		row := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+		row := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 		err = pas.encoder.Encode(diag, row)
 		pas.logger.HandleError(err)
 		matrix[i] = row
@@ -408,7 +408,7 @@ func (pas *mfvPastaPack) diagonal() {
 			diag[j+pas.halfSlots] = pas.mat2[j][(j+matrixDim-i)%matrixDim]
 		}
 
-		row := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+		row := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 		err = pas.encoder.Encode(diag, row)
 		pas.logger.HandleError(err)
 		matrix[i] = row
