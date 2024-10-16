@@ -424,6 +424,7 @@ func benchmarkRtFRubato(b *testing.B, rubatoParam int) {
 		poly := plainCKKSRingTs[s].Value()[0]
 		for i := 0; i < params.N(); i++ {
 			j := utils.BitReverse64(uint64(i), uint64(params.LogN()))
+			// encrypt data symmetrically
 			poly.Coeffs[0][j] = (poly.Coeffs[0][j] + keystream[i][s]) % params.PlainModulus()
 		}
 	}

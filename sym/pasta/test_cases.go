@@ -24,11 +24,10 @@ var pasta3TestVector = []TestContext{
 	{
 		Tc: ENC,
 		Params: Parameter{
-			Rounds:     3,
-			KeySize:    256,
-			PlainSize:  128,
-			CipherSize: 128,
-			Modulus:    65537,
+			Rounds:    3,
+			KeySize:   256,
+			BlockSize: 128,
+			Modulus:   65537,
 		},
 		Key: HHESoK.Key{
 			0x07a30, 0x0cfe2, 0x03bbb, 0x06ab7, 0x0de0b, 0x0c36c, 0x01c39,
@@ -111,11 +110,10 @@ var pasta3TestVector = []TestContext{
 	}, {
 		Tc: ENC,
 		Params: Parameter{
-			Rounds:     3,
-			KeySize:    256,
-			PlainSize:  128,
-			CipherSize: 128,
-			Modulus:    8088322049,
+			Rounds:    3,
+			KeySize:   256,
+			BlockSize: 128,
+			Modulus:   8088322049,
 		},
 		Key: HHESoK.Key{
 			0x02d65ac52, 0x1c6b45d1c, 0x1cb39041d, 0x0a114487b, 0x1bd58169e,
@@ -227,11 +225,10 @@ var pasta3TestVector = []TestContext{
 	}, {
 		Tc: ENC,
 		Params: Parameter{
-			Rounds:     3,
-			KeySize:    256,
-			PlainSize:  128,
-			CipherSize: 128,
-			Modulus:    1096486890805657601,
+			Rounds:    3,
+			KeySize:   256,
+			BlockSize: 128,
+			Modulus:   1096486890805657601,
 		},
 		Key: HHESoK.Key{
 			0x892f9ff42160c81, 0xa652a61d10eabf3, 0x76bb71c0ddc0c06,
@@ -415,11 +412,10 @@ var pasta4TestVector = []TestContext{
 	{
 		Tc: ENC,
 		Params: Parameter{
-			Rounds:     4,
-			KeySize:    64,
-			PlainSize:  32,
-			CipherSize: 32,
-			Modulus:    65537,
+			Rounds:    4,
+			KeySize:   64,
+			BlockSize: 32,
+			Modulus:   65537,
 		},
 		Key: HHESoK.Key{
 			0x07a30, 0x0cfe2, 0x03bbb, 0x06ab7, 0x0de0b, 0x0c36c, 0x01c39,
@@ -447,11 +443,10 @@ var pasta4TestVector = []TestContext{
 	}, {
 		Tc: ENC,
 		Params: Parameter{
-			Rounds:     4,
-			KeySize:    64,
-			PlainSize:  32,
-			CipherSize: 32,
-			Modulus:    8088322049,
+			Rounds:    4,
+			KeySize:   64,
+			BlockSize: 32,
+			Modulus:   8088322049,
 		},
 		Key: HHESoK.Key{
 			0x02d65ac52, 0x1c6b45d1c, 0x1cb39041d, 0x0a114487b, 0x1bd58169e,
@@ -486,11 +481,10 @@ var pasta4TestVector = []TestContext{
 	}, {
 		Tc: ENC,
 		Params: Parameter{
-			Rounds:     4,
-			KeySize:    64,
-			PlainSize:  32,
-			CipherSize: 32,
-			Modulus:    1096486890805657601,
+			Rounds:    4,
+			KeySize:   64,
+			BlockSize: 32,
+			Modulus:   1096486890805657601,
 		},
 		Key: HHESoK.Key{
 			0x892f9ff42160c81, 0xa652a61d10eabf3, 0x76bb71c0ddc0c06,

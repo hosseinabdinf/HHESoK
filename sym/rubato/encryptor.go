@@ -3,7 +3,6 @@ package rubato
 import (
 	"HHESoK"
 	"encoding/binary"
-	"fmt"
 	"math"
 )
 
@@ -16,14 +15,15 @@ type encryptor struct {
 	rub rubato
 }
 
+// Encrypt plaintext vector
 func (enc encryptor) Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext {
-	p := enc.rub.params.GetModulus()
-	outputSize := enc.rub.params.GetBlockSize() - 4
-	size := len(plaintext)
-	numBlock := int(math.Ceil(float64(size / outputSize)))
-	if HHESoK.DEBUG {
-		fmt.Printf("=== Number of Block: %d\n", numBlock)
-	}
+	logger := HHESoK.NewLogger(HHESoK.DEBUG)
+	var size = len(plaintext)
+	var modulus = enc.rub.params.GetModulus()
+	var ksSize = enc.rub.params.GetBlockSize() - 4
+	var numBlock = int(math.Ceil(float64(size / ksSize)))
+	logger.PrintFormatted("Number of Block: %d", numBlock)
+
 	// Nonce and Counter
 	nonces := make([][]byte, numBlock)
 	// set nonce up to blockSize
@@ -33,29 +33,29 @@ func (enc encryptor) Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext {
 		binary.BigEndian.PutUint64(nonces[i], uint64(i+n))
 	}
 	counter := make([]byte, 8)
-	// Ciphertext
+
 	ciphertext := make(HHESoK.Ciphertext, size)
 	copy(ciphertext, plaintext)
-	// Keystream
+
 	for i := 0; i < numBlock; i++ {
-		z := make(HHESoK.Block, outputSize)
+		z := make(HHESoK.Block, ksSize)
 		binary.BigEndian.PutUint64(counter, uint64(i+1))
-		// counter mode
 		copy(z, enc.rub.KeyStream(nonces[i], counter))
-		// encrypt the plaintext
-		ciphertext[i] = (ciphertext[i] + z[i]) % p
+		ciphertext[i] = (ciphertext[i] + z[i]) % modulus
 	}
+
 	return ciphertext
 }
 
+// Decrypt ciphertext vector
 func (enc encryptor) Decrypt(ciphertext HHESoK.Ciphertext) HHESoK.Plaintext {
-	p := enc.rub.params.GetModulus()
-	outputSize := enc.rub.params.GetBlockSize() - 4
-	size := len(ciphertext)
-	numBlock := int(math.Ceil(float64(size / outputSize)))
-	if HHESoK.DEBUG {
-		fmt.Printf("=== Number of Block: %d\n", numBlock)
-	}
+	logger := HHESoK.NewLogger(HHESoK.DEBUG)
+	var size = len(ciphertext)
+	var modulus = enc.rub.params.GetModulus()
+	var ksSize = enc.rub.params.GetBlockSize() - 4
+	var numBlock = int(math.Ceil(float64(size / ksSize)))
+	logger.PrintFormatted("Number of Block: %d", numBlock)
+
 	// Nonce and Counter
 	nonces := make([][]byte, numBlock)
 	// set nonce up to blockSize
@@ -65,17 +65,19 @@ func (enc encryptor) Decrypt(ciphertext HHESoK.Ciphertext) HHESoK.Plaintext {
 		binary.BigEndian.PutUint64(nonces[i], uint64(i+n))
 	}
 	counter := make([]byte, 8)
-	// Ciphertext
+
 	plaintext := make(HHESoK.Plaintext, size)
 	copy(plaintext, ciphertext)
-	// Keystream
+
 	for i := 0; i < numBlock; i++ {
-		z := make(HHESoK.Block, outputSize)
+		z := make(HHESoK.Block, ksSize)
 		binary.BigEndian.PutUint64(counter, uint64(i+1))
-		// counter mode
 		copy(z, enc.rub.KeyStream(nonces[i], counter))
-		// encrypt the plaintext
-		plaintext[i] = (plaintext[i] + z[i]) % p
+		if z[i] > plaintext[i] {
+			plaintext[i] += modulus
+		}
+		plaintext[i] = plaintext[i] - z[i]
 	}
+
 	return plaintext
 }

@@ -4,7 +4,6 @@ import (
 	"HHESoK"
 	"encoding/binary"
 	"fmt"
-	"github.com/tuneinsight/lattigo/v5/core/rlwe"
 	"testing"
 )
 

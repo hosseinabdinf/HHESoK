@@ -4,8 +4,8 @@ import (
 	"HHESoK"
 	"HHESoK/sym/pasta"
 	"encoding/binary"
-	"github.com/tuneinsight/lattigo/v5/core/rlwe"
-	"github.com/tuneinsight/lattigo/v5/schemes/bfv"
+	"github.com/tuneinsight/lattigo/v6/core/rlwe"
+	"github.com/tuneinsight/lattigo/v6/schemes/bgv"
 	"golang.org/x/crypto/sha3"
 	"math"
 	"math/big"
@@ -15,7 +15,7 @@ type MFVPasta interface {
 	Crypt(nonce []byte, kCt *rlwe.Ciphertext, dCt HHESoK.Ciphertext) (res []*rlwe.Ciphertext)
 	EncKey(key []uint64) (res *rlwe.Ciphertext)
 	GetGaloisElements(dataSize int) []uint64
-	UpdateEvaluator(evaluator *bfv.Evaluator)
+	UpdateEvaluator(evaluator *bgv.Evaluator)
 }
 
 type mfvPasta struct {
@@ -42,22 +42,22 @@ type mfvPasta struct {
 	bsGsN2    uint64
 	gkIndices []int
 
-	bfvParams bfv.Parameters
-	encoder   *bfv.Encoder
-	evaluator *bfv.Evaluator
+	bfvParams bgv.Parameters
+	encoder   *bgv.Encoder
+	evaluator *bgv.Evaluator
 	encryptor *rlwe.Encryptor
 
 	rcPt *rlwe.Plaintext
 	rc   []uint64
 }
 
-func NEWMFVPasta(params Parameter, fvParams bfv.Parameters, symParams pasta.Parameter, encoder *bfv.Encoder, encryptor *rlwe.Encryptor, evaluator *bfv.Evaluator) MFVPasta {
+func NEWMFVPasta(params Parameter, fvParams bgv.Parameters, symParams pasta.Parameter, encoder *bgv.Encoder, encryptor *rlwe.Encryptor, evaluator *bgv.Evaluator) MFVPasta {
 	fvPasta := new(mfvPasta)
 	fvPasta.logger = HHESoK.NewLogger(HHESoK.DEBUG)
 
 	fvPasta.bfvParams = fvParams
 	fvPasta.numRound = symParams.Rounds
-	fvPasta.plainSize = uint64(symParams.PlainSize)
+	fvPasta.plainSize = uint64(symParams.BlockSize)
 
 	fvPasta.logN = fvParams.LogN()
 	fvPasta.modDegree = params.modDegree
@@ -151,7 +151,7 @@ func (pas *mfvPasta) Crypt(nonce []byte, kCt *rlwe.Ciphertext, dCt HHESoK.Cipher
 		var sIndex = b * pas.plainSize
 		var eIndex = int(math.Min(float64((b+1)*pas.plainSize), float64(size)))
 		symCt := dCt[sIndex:eIndex]
-		plaintext := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+		plaintext := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 		_ = pas.encoder.Encode(symCt, plaintext)
 		// negate state --> state = state * -1
 		pas.state, _ = pas.evaluator.MulNew(pas.state, -1)
@@ -170,12 +170,12 @@ func (pas *mfvPasta) EncKey(key []uint64) (res *rlwe.Ciphertext) {
 		dupKey[i+pas.halfSlots] = key[i+pas.plainSize]
 	}
 
-	pKey := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+	pKey := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 	err := pas.encoder.Encode(dupKey, pKey)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 
 	res, err = pas.encryptor.EncryptNew(pKey)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 
 	return
 }
@@ -193,7 +193,7 @@ func (pas *mfvPasta) GetGaloisElements(dataSize int) []uint64 {
 	return galEls
 }
 
-func (pas *mfvPasta) UpdateEvaluator(evaluator *bfv.Evaluator) {
+func (pas *mfvPasta) UpdateEvaluator(evaluator *bgv.Evaluator) {
 	pas.evaluator = evaluator
 }
 
@@ -259,26 +259,26 @@ func (pas *mfvPasta) addDiagonalIndices(size int) {
 // ///////////////////////		PASTA's homomorphic functions		///////////////////////
 // addRC add round constant to the state
 func (pas *mfvPasta) addRC() {
-	pas.rcPt = bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+	pas.rcPt = bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 	err := pas.encoder.Encode(pas.rc, pas.rcPt)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 	err = pas.evaluator.Add(pas.state, pas.rcPt, pas.state)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 	return
 }
 
 func (pas *mfvPasta) sBoxCube() {
 	tmp := pas.state.CopyNew()
 	err := pas.evaluator.MulRelin(pas.state, pas.state, pas.state)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 	err = pas.evaluator.MulRelin(pas.state, tmp, pas.state)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 }
 
 func (pas *mfvPasta) sBoxFeistel() {
 	// rotate -1 to the left
 	stateRotate, err := pas.evaluator.RotateColumnsNew(pas.state, -1)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 
 	// generate masks
 	masks := make([]uint64, pas.plainSize+pas.halfSlots)
@@ -290,18 +290,18 @@ func (pas *mfvPasta) sBoxFeistel() {
 	for i := pas.plainSize; i < pas.halfSlots; i++ {
 		masks[i] = 0
 	}
-	maskPlaintext := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+	maskPlaintext := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 	err = pas.encoder.Encode(masks, maskPlaintext)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 	// stateRot = stateRot * mask
 	err = pas.evaluator.Mul(stateRotate, maskPlaintext, stateRotate)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 	// stateRot = stateRot ^ 2
 	err = pas.evaluator.MulRelin(stateRotate, stateRotate, stateRotate)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 	// state = state + stateRot^2
 	err = pas.evaluator.Add(pas.state, stateRotate, pas.state)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 }
 
 func (pas *mfvPasta) matMul() {
@@ -366,9 +366,9 @@ func (pas *mfvPasta) babyStepGiantStep() {
 			diag[j] = tmp[j-pas.halfSlots]
 		}
 
-		row := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+		row := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 		err = pas.encoder.Encode(diag, row)
-		pas.logger.HandleError(err)
+		HHESoK.HandleError(err)
 		matrix[i] = row
 	}
 
@@ -376,9 +376,9 @@ func (pas *mfvPasta) babyStepGiantStep() {
 	if pas.halfSlots != pas.plainSize {
 		stateRotate := pas.state.CopyNew()
 		err = pas.evaluator.RotateColumns(pas.state, int(pas.plainSize), stateRotate)
-		pas.logger.HandleError(err)
+		HHESoK.HandleError(err)
 		err = pas.evaluator.Add(pas.state, stateRotate, pas.state)
-		pas.logger.HandleError(err)
+		HHESoK.HandleError(err)
 	}
 
 	rotates := make([]*rlwe.Ciphertext, pas.bsGsN1)
@@ -387,7 +387,7 @@ func (pas *mfvPasta) babyStepGiantStep() {
 	var outerSum *rlwe.Ciphertext
 	for j := uint64(1); j < pas.bsGsN1; j++ {
 		rotates[j], err = pas.evaluator.RotateColumnsNew(rotates[j-1], -1)
-		pas.logger.HandleError(err)
+		HHESoK.HandleError(err)
 	}
 
 	for k := uint64(0); k < pas.bsGsN2; k++ {
@@ -418,7 +418,7 @@ func (pas *mfvPasta) diagonal() {
 	if pas.halfSlots != matrixDim {
 		stateRotate, _ := pas.evaluator.RotateColumnsNew(pas.state, int(matrixDim))
 		err = pas.evaluator.Add(pas.state, stateRotate, pas.state)
-		pas.logger.HandleError(err)
+		HHESoK.HandleError(err)
 	}
 
 	//	prepare diagonal method
@@ -434,15 +434,15 @@ func (pas *mfvPasta) diagonal() {
 			diag[j+pas.halfSlots] = pas.mat2[j][(j+matrixDim-i)%matrixDim]
 		}
 
-		row := bfv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
+		row := bgv.NewPlaintext(pas.bfvParams, pas.bfvParams.MaxLevel())
 		err = pas.encoder.Encode(diag, row)
-		pas.logger.HandleError(err)
+		HHESoK.HandleError(err)
 		matrix[i] = row
 	}
 
 	sum := pas.state.CopyNew()
 	err = pas.evaluator.Mul(sum, matrix[0], sum)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 	for i := uint64(1); i < matrixDim; i++ {
 		pas.state, _ = pas.evaluator.RotateColumnsNew(pas.state, -1)
 		tmp, _ := pas.evaluator.MulNew(pas.state, matrix[i])
@@ -454,11 +454,11 @@ func (pas *mfvPasta) diagonal() {
 func (pas *mfvPasta) mix() {
 	originalState := pas.state.CopyNew()
 	tmp, err := pas.evaluator.RotateRowsNew(pas.state)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 	err = pas.evaluator.Add(tmp, originalState, tmp)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 	err = pas.evaluator.Add(originalState, tmp, pas.state)
-	pas.logger.HandleError(err)
+	HHESoK.HandleError(err)
 }
 
 // ///////////////////////		PASTA's non-homomorphic functions	///////////////////////

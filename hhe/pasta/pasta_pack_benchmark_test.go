@@ -5,7 +5,7 @@ import (
 	"HHESoK/sym/pasta"
 	"encoding/binary"
 	"fmt"
-	"github.com/tuneinsight/lattigo/v5/core/rlwe"
+	"github.com/tuneinsight/lattigo/v6/core/rlwe"
 	"testing"
 )
 

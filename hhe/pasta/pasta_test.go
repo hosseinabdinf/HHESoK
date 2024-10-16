@@ -9,7 +9,7 @@ import (
 
 func testString(opName string, p pasta.Parameter) string {
 	return fmt.Sprintf("%s/KeySize=%d/PlainSize=%d/CipherSize=%d/Modulus=%d/Rounds=%d",
-		opName, p.GetKeySize(), p.GetPlainSize(), p.GetCipherSize(), p.GetModulus(), p.GetRounds())
+		opName, p.GetKeySize(), p.GetBlockSize(), p.GetBlockSize(), p.GetModulus(), p.GetRounds())
 }
 
 func TestPasta3(t *testing.T) {

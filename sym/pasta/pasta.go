@@ -41,8 +41,8 @@ func NewPasta(secretKey HHESoK.Key, params Parameter) Pasta {
 	mps = (1 << mps) - 1
 
 	// init empty states
-	state1 := make(HHESoK.Block, params.GetPlainSize())
-	state2 := make(HHESoK.Block, params.GetPlainSize())
+	state1 := make(HHESoK.Block, params.GetBlockSize())
+	state2 := make(HHESoK.Block, params.GetBlockSize())
 
 	// create a new pasta instance
 	pas := &pasta{
@@ -90,7 +90,7 @@ func (pas *pasta) preProcess(nonce []byte, counter []byte) {
 // KeyStream generate pasta secretKey stream based on nonce and counter
 func (pas *pasta) KeyStream(nonce []byte, counter []byte) HHESoK.Block {
 	pas.initShake(nonce, counter)
-	ps := pas.params.GetPlainSize()
+	ps := pas.params.GetBlockSize()
 
 	// copy half of the secretKey to state1 and the other half to state2
 	copy(pas.state1, pas.secretKey[:ps])
@@ -127,7 +127,7 @@ func (pas *pasta) round(r int) {
 // sBoxCube state[i] := (state[i] ^ 3)
 func (pas *pasta) sBoxCube(state *HHESoK.Block) {
 	modulus := new(big.Int).SetUint64(pas.params.GetModulus())
-	for i := 0; i < pas.params.GetPlainSize(); i++ {
+	for i := 0; i < pas.params.GetBlockSize(); i++ {
 		// square = state ^ 2 (mod p)
 		curState := new(big.Int).SetUint64((*state)[i])
 		square := new(big.Int).Mul(curState, curState)
@@ -143,7 +143,7 @@ func (pas *pasta) sBoxCube(state *HHESoK.Block) {
 
 // sBoxFeistel state[i] := {i = 0; state[i];state[i] + (state[i-1] ^ 2)}
 func (pas *pasta) sBoxFeistel(state *HHESoK.Block) {
-	ps := pas.params.GetPlainSize()
+	ps := pas.params.GetBlockSize()
 	modulus := new(big.Int).SetUint64(pas.params.GetModulus())
 
 	nState := make(HHESoK.Block, ps)
@@ -180,7 +180,7 @@ func (pas *pasta) linearLayer() {
 // matmul implementation of matrix multiplication
 // requires storage of two row in the matrix
 func (pas *pasta) matmul(state *HHESoK.Block) {
-	ps := pas.params.GetPlainSize()
+	ps := pas.params.GetBlockSize()
 	modulus := new(big.Int).SetUint64(pas.params.GetModulus())
 	newState := make(HHESoK.Block, ps)
 	rand := pas.getRandomVector(false)
@@ -206,7 +206,7 @@ func (pas *pasta) matmul(state *HHESoK.Block) {
 
 // addRC add state with a random field element
 func (pas *pasta) addRC(state *HHESoK.Block) {
-	ps := pas.params.GetPlainSize()
+	ps := pas.params.GetBlockSize()
 	modulus := new(big.Int).SetUint64(pas.params.GetModulus())
 
 	for i := 0; i < ps; i++ {
@@ -227,7 +227,7 @@ func (pas *pasta) addRC(state *HHESoK.Block) {
 
 // mix add the state1 and state2
 func (pas *pasta) mix() {
-	ps := pas.params.GetPlainSize()
+	ps := pas.params.GetBlockSize()
 	modulus := new(big.Int).SetUint64(pas.params.GetModulus())
 
 	// allocate memory for the two state
@@ -290,7 +290,7 @@ func (pas *pasta) generateRandomFieldElement(allowZero bool) uint64 {
 
 // getRandomVector generate random Block with the same size as plaintext
 func (pas *pasta) getRandomVector(allowZero bool) HHESoK.Block {
-	ps := pas.params.GetPlainSize()
+	ps := pas.params.GetBlockSize()
 	rc := make(HHESoK.Block, ps)
 	for i := 0; i < ps; i++ {
 		rc[i] = pas.generateRandomFieldElement(allowZero)
@@ -309,7 +309,7 @@ func (pas *pasta) getRandomVector(allowZero bool) HHESoK.Block {
 
 // GetRandomMatrix generate a random invertible matrix
 func (pas *pasta) getRandomMatrix() HHESoK.Matrix {
-	ps := pas.params.GetPlainSize()
+	ps := pas.params.GetBlockSize()
 	mat := make(HHESoK.Matrix, ps) // mat[ps][ps]
 	for i := range mat {
 		mat[i] = make(HHESoK.Block, ps) // mat[i] = [ps]
@@ -323,7 +323,7 @@ func (pas *pasta) getRandomMatrix() HHESoK.Matrix {
 
 // GetRcVector return a vector of random elements, the vector size will be (size+plainSize)
 func (pas *pasta) getRcVector(size int) HHESoK.Block {
-	ps := pas.params.GetPlainSize()
+	ps := pas.params.GetBlockSize()
 	rc := make(HHESoK.Block, size+ps)
 	for i := 0; i < ps; i++ {
 		rc[i] = pas.generateRandomFieldElement(false)
@@ -336,7 +336,7 @@ func (pas *pasta) getRcVector(size int) HHESoK.Block {
 
 // calculateRow
 func (pas *pasta) calculateRow(previousRow, firstRow HHESoK.Block) HHESoK.Block {
-	ps := pas.params.GetPlainSize()
+	ps := pas.params.GetBlockSize()
 	modulus := new(big.Int).SetUint64(pas.params.GetModulus())
 	output := make(HHESoK.Block, ps)
 	// =======================================
