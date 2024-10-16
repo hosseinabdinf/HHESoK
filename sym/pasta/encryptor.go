@@ -21,7 +21,7 @@ func (enc encryptor) Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext {
 	var size = uint64(len(plaintext))
 	var modulus = enc.pas.params.GetModulus()
 	var blockSize = uint64(enc.pas.params.GetBlockSize())
-	var numBlock = math.Ceil(float64(size / blockSize))
+	var numBlock = uint64(math.Ceil(float64(size / blockSize)))
 	logger.PrintFormatted("Number of Block: %d", numBlock)
 
 	nonce := make([]byte, 8)
@@ -31,7 +31,7 @@ func (enc encryptor) Encrypt(plaintext HHESoK.Plaintext) HHESoK.Ciphertext {
 	ciphertext := make(HHESoK.Ciphertext, size)
 	copy(ciphertext, plaintext)
 
-	for b := uint64(0); b < uint64(numBlock); b++ {
+	for b := uint64(0); b < numBlock; b++ {
 		binary.BigEndian.PutUint64(counter, b)
 		keyStream := enc.pas.KeyStream(nonce, counter)
 		for i := b * blockSize; i < (b+1)*blockSize && i < size; i++ {
